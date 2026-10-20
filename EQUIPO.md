@@ -45,7 +45,7 @@ Todos pueden usar las máquinas del DSIC-UPV para lanzar lo pesado: bluenote.dsi
 4. **Columnas que no son features:** `sample_id`, `target_index`, `session`, `atco`, `scenario`, `timestamp`, `task_name`. `row_index` solo si el EDA demuestra que aporta.
 5. Se entrena con `train.csv` + `validation.csv` juntos.
 6. **Nadie sube a Kaggle salvo Juanma.**
-7. No subir `submissions/sub_lgb_temporal.csv` (usa features futuras). Lo que va a `models/future/` es solo referencia.
+7. El código con snapshots futuros/pasados se ha quitado; si se permite, está en el commit `67a15bc`.
 
 ### Formato común de salidas (para poder combinar modelos)
 Cada modelo genera tres archivos:
@@ -53,22 +53,25 @@ Cada modelo genera tres archivos:
 - `preds/<modelo>.csv`: predicciones de test con el modelo entrenado con todo, mismo formato.
 - `submissions/sub_<modelo>.csv`: columnas `sample_id,prediction`, con 3 `row_index` separados por espacios.
 
-Cada script imprime su **CV top-3** usando `src/metric.py`. Se guarda el OOF aunque el modelo sea peor, porque en el stacking puede sumar.
+Cada script imprime su **CV top-3** usando `cv/metric.py`. Se guarda el OOF aunque el modelo sea peor, porque en el stacking puede sumar.
 
 ### Estructura del repo
 ```
 Data/          train/validation/test.csv, folds.csv, scorer.py   (CSV no versionados)
+cv/metric.py                    ← Juanma (C) · top-3, report(), save_outputs()
 src/
-  folds.py, metric.py           ← Juanma (C)
-  features.py                   ← Adri (B), lo importan todos
-  m_lgb.py, m_xgb.py, m_cat.py  ← Adri (B)
-  m_nn.py                       ← Pablo (A)
-  m_types.py, m_two_stage.py    ← Juanma (C)
-  stack.py                      ← Juanma (C)
-notebooks/     EDA_pau.ipynb, errores_pau.ipynb
-oof/ preds/ submissions/
-RESULTADOS.md  tabla de experimentos (Pau)
+  folds.py                      ← Juanma (C) · genera Data/folds.csv
+  features.py                   ← Adri (B) · features del snapshot (logic_*) -> models/features.parquet
+  m_clogit.py                   ← Juanma (C) · logit condicional sobre logic_* (analítico)
+  m_nn.py, nn_sweep.py          ← Pablo (A) · transformer de snapshot y barridos
+hierarchical/m_types.py         ← Juanma (C) · P(tipo) × P(tarea | tipo)
+linear/m_linear.py              ← Juanma (C) · logit condicional con todas las columnas y pendiente por tipo
+stacking/stack.py               ← Juanma (C) · media ponderada y meta-ranker sobre oof/
+notebooks/     01_eda.ipynb, LGB_adri.ipynb (LightGBM), NN_pablo.ipynb
+experiments/   registro de ejecuciones (lgb_runs.csv, nn_runs.csv)
+oof/ preds/ submissions/   salidas en formato común (no versionadas)
 ```
+Pendiente: XGBoost / CatBoost (Adri) y dos etapas avión → tarea (Juanma).
 Cada persona trabaja en su rama de git. Los CSV pesados se comparten por carpeta compartida, no por git.
 
 ### Resultados conocidos

@@ -9,8 +9,6 @@ Data/*.csv
 # Salidas generadas
 submissions/*
 !submissions/.gitkeep
-oof/
-preds/
 models/*
 !models/.gitkeep
 *.pkl

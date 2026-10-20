@@ -28,20 +28,7 @@ Equipo de 4: Pablo, Adrián, Pau, Juanma. Hackathon de 24 h. Kaggle cierra el **
 - Comprobar en validación con: `python Data/scorer.py --labelled Data/validation.csv <sub>.csv`
 
 ## Estructura del repo
-```
-Data/          train, validation, test, folds.csv, scorer.py (los CSV no se versionan)
-src/
-  folds.py     común (Juanma)
-  metric.py    común (Juanma)
-  features.py  común: features dentro del snapshot (dueño: Pau)
-  m_lgb.py     LightGBM LambdaRank (Pau)
-  m_types.py   especialistas por tipo + dos etapas avión→tarea (Adrián)
-  m_nn.py      transformer de conjunto sobre la lista (Pablo, GPU RTX 3060)
-  m_xgb_cat.py XGBoost rank:pairwise, CatBoost YetiRank, logística (Juanma)
-  stack.py     meta-modelo sobre los OOF y promedio de rankings (Juanma)
-notebooks/     EDA_<nombre>.ipynb
-oof/ preds/ submissions/
-```
+La estructura vigente (archivos y dueños) está en `EQUIPO.md`, sección «Estructura del repo».
 Cada persona trabaja en su rama de git. Los CSV grandes se comparten por carpeta compartida, no por git.
 
 ## Reparto
@@ -63,9 +50,7 @@ Cada persona trabaja en su rama de git. Los CSV grandes se comparten por carpeta
 - Usando snapshots futuros (siguiente input del controlador sobre el avión, a partir de `a_since_flight`): 0.83. **No permitido por ahora.**
 
 ## Ojo
-- `src/baseline_ranker.py` y `src/train.py` (LightGBM con features futuras) se han eliminado; LightGBM es de Adri.
-- `src/m_clogit.py` (Juanma): sin `--future` cumple la regla 1 y guarda en `oof/` y `preds/`; con `--future` solo es referencia y va a `models/future/`.
-- **No subir** `submissions/sub_lgb_temporal.csv`.
+- Todo el código con snapshots pasados/futuros (features `f_*`/`p_*`, `baseline_ranker.py`, `train.py`, `transformer.py`, clogit `--future`) se ha quitado del repo. Si se permite, recuperarlo del commit `67a15bc`.
 - Las etiquetas tienen ruido y los controladores no coinciden mucho entre sí: el techo está bastante por debajo de 1. Preferir modelos robustos a los sobreajustados.
 
 ## Cómo trabajar con Claude en este repo
