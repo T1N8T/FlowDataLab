@@ -68,7 +68,7 @@ def cat_fit_predict(a, A, F, preds_on, seed):
         x["task_index"] = x.task_index.astype(int)
         return Pool(x, label=y, group_id=df.sample_id.values, cat_features=["task_index"])
     params = dict(loss_function="YetiRank", iterations=a.n_estimators, learning_rate=a.lr, depth=a.depth,
-                  random_seed=seed, verbose=0, thread_count=-1)
+                  random_seed=seed, verbose=0, thread_count=-1, metric_period=a.n_estimators)
     if not a.cpu:
         params.update(task_type="GPU", devices="0")
     m = CatBoost(params)
