@@ -1,0 +1,2 @@
+[f5_clear_et] f5_clear_xendcg                CV top3 = 0.8978  min atco 0.734  std folds 0.024
+f5_clear_xendcg: CV 0.8978 (627s) base+logic+past+future+clear {'objective': 'rank_xendcg'}

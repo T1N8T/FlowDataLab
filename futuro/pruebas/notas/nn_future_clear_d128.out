@@ -1,0 +1,31 @@
++33 columnas temporales: ['f_next_input', 'f_next_input2', 'f_next_act', 'f_next_input_rk', 'f_next_match', 'f_next_match_soon', 'f_task_end', 'f_cs_end', 'f_task_end_rk', 'f_task_end_rk_flight', 'f_gone_next', 'f_end_in_block', 'p_task_start', 'p_task_start_rk', 'p_new_in_block', 'p_d_time_to_sector', 'p_d_x_task_age', 'p_d_a_since_flight', 'p_since_any_rk', 'sx_cfl', 'sx_heading', 'sx_exitfl', 'sx_zone_off', 'sx_conflict_off', 'sx_route_ok', 'sx_task', 'sx_task_rk', 'sx_task_rk_type', 'sx_task_rk_flight', 'blk_pos', 'blk_len', 'gap_prev', 'gap_next']
+182 features por tarea, 13175 muestras etiquetadas, 1863 de test, L=59
+
+=== nn_future_clear_d128 RAMA FUTURO: + features de otros snapshots  device=cuda  seeds=3 d=128 heads=4 layers=4 drop=0.2 ls=0.0 lr=0.0005 wd=0.05 bs=128 epochs=40 patience=6 noise=0.0 n_es=3 folds= quick=False rel=False same_ac=False drop_red=False
+  166 de 182 columnas
+  fold 0 seed 0: best_ep= 9  top3=0.9037  (43s)
+  fold 0 seed 1: best_ep=11  top3=0.8953  (92s)
+  fold 0 seed 2: best_ep=10  top3=0.9062  (135s)
+fold 0: top3=0.9074
+  fold 1 seed 0: best_ep= 7  top3=0.8799  (167s)
+  fold 1 seed 1: best_ep=10  top3=0.8756  (211s)
+  fold 1 seed 2: best_ep= 6  top3=0.8745  (243s)
+fold 1: top3=0.8886
+  fold 2 seed 0: best_ep=26  top3=0.8524  (330s)
+  fold 2 seed 1: best_ep=10  top3=0.8590  (375s)
+  fold 2 seed 2: best_ep= 9  top3=0.8509  (418s)
+fold 2: top3=0.8601
+  fold 3 seed 0: best_ep= 9  top3=0.8765  (458s)
+  fold 3 seed 1: best_ep= 7  top3=0.8793  (496s)
+  fold 3 seed 2: best_ep=11  top3=0.8684  (542s)
+fold 3: top3=0.8882
+  fold 4 seed 0: best_ep=11  top3=0.8757  (589s)
+  fold 4 seed 1: best_ep= 7  top3=0.8677  (625s)
+  fold 4 seed 2: best_ep=14  top3=0.8746  (675s)
+fold 4: top3=0.8845
+nn_future_clear_d128: CV top3 = 0.8853   (min atco 0.743, media por atco 0.877)   épocas óptimas [9, 11, 10, 7, 10, 6, 26, 10, 9, 9, 7, 11, 11, 7, 14]
+  test seed 0: 10 épocas (716s)
+  test seed 1: 10 épocas (755s)
+  test seed 2: 10 épocas (795s)
+Guardado oof/nn_future_clear_d128.csv, preds/nn_future_clear_d128.csv, submissions/sub_nn_future_clear_d128.csv
+Comprobar: python Data/scorer.py --labelled Data/validation.csv oof/sub_nn_future_clear_d128_validation.csv
