@@ -18,7 +18,8 @@
  },
  "seeds": [
   0,
-  1
+  1,
+  2
  ],
  "features": [
   "seq_len",
@@ -121,5 +122,5 @@
   "cx_n_conflict",
   "cx_n_entry_coord"
  ],
- "cv_top3": 0.6569
+ "cv_top3": 0.6562
 }

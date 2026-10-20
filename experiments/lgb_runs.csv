@@ -20,3 +20,11 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 19:11,base+deadline,deadline,{},92,0.651,0.0177,1 semillas.
 19:12,base+alerta+contexto,alerta+contexto,{},99,0.6596,0.0245,1 semillas.
 19:13,FINAL base+alerta+contexto,alerta+contexto,{},99,0.6569,0.029,2 semillas. Modelo guardado
+19:33,b4/base,alerta+contexto,{},99,0.6569,0.029,2 semillas. peor_atco 0.570. referencia del bloque
+19:35,b4/avion_tipos,alerta+contexto+avion_tipos,{},109,0.6532,0.0206,2 semillas. peor_atco 0.568. qué otras tareas tiene el avión
+19:36,b4/trunc=3,alerta+contexto,{'lambdarank_truncation_level': 3},99,0.6556,0.0226,2 semillas. peor_atco 0.567. la pérdida mira solo el top-3
+19:37,b4/trunc=10,alerta+contexto,{'lambdarank_truncation_level': 10},99,0.6537,0.0247,2 semillas. peor_atco 0.576. dar peso a respuestas en 6ª-10ª
+19:38,b4/xendcg,alerta+contexto,{'objective': 'rank_xendcg'},99,0.6421,0.0303,2 semillas. peor_atco 0.570. pérdida más robusta al ruido
+19:40,b4/regularizado,alerta+contexto,"{'n_estimators': 700, 'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 100}",99,0.6503,0.0241,"2 semillas. peor_atco 0.588. árboles más simples, menos memorizar"
+19:44,b5/comb,alerta+contexto,{},99,0.6569,0.029,2 semillas. peor_atco 0.570. combinación de ganadores
+19:46,FINAL lgb_adri,alerta+contexto,{},99,0.6562,0.0239,3 semillas. peor_atco 0.571. Modelo guardado
