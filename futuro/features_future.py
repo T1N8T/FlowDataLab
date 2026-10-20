@@ -13,6 +13,7 @@ import numpy as np, pandas as pd
 from pathlib import Path
 from feat_coord import add_coord      # sc_*: cambios futuros de coordinación / assume (Pablo)
 from feat_clear import add_clear      # sx_*: cambios futuros de instrucciones (Adri)
+from feat_block import add_block      # bk_*: futuro medido por racha (Pablo)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA, MODELS = ROOT / "Data", ROOT / "models"
@@ -159,18 +160,20 @@ def build():
     d = add_past(d)
     d = add_coord(d)
     d = add_clear(d)
+    d = add_block(d)
     return d
 
 
 def feature_sets(d):
-    base = [c for c in d.columns if c not in META and not c.startswith(("logic_", "f_", "p_", "sc_", "sx_"))
+    base = [c for c in d.columns if c not in META and not c.startswith(("logic_", "f_", "p_", "sc_", "sx_", "bk_"))
             and c not in ("blk_pos", "blk_len", "gap_prev", "gap_next")]
     logic = [c for c in d.columns if c.startswith("logic_")]
     fut = [c for c in d.columns if c.startswith("f_")]
     past = [c for c in d.columns if c.startswith("p_")] + ["blk_pos", "blk_len", "gap_prev", "gap_next"]
     coord = [c for c in d.columns if c.startswith("sc_")]
     clear = [c for c in d.columns if c.startswith("sx_")]
-    return dict(base=base, logic=logic, future=fut, past=past, coord=coord, clear=clear)
+    block = [c for c in d.columns if c.startswith("bk_")]
+    return dict(base=base, logic=logic, future=fut, past=past, coord=coord, clear=clear, block=block)
 
 
 if __name__ == "__main__":

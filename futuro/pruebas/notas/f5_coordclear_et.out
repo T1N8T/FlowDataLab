@@ -1,0 +1,2 @@
+[f5_clear_et] f5_coordclear_et               CV top3 = 0.9064  min atco 0.760  std folds 0.022
+f5_coordclear_et: CV 0.9064 (202s) base+logic+past+future+coord+clear {'extra_trees': True}

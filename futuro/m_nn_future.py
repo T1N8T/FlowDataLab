@@ -25,11 +25,15 @@ import m_nn, features_future as features   # versión con pasado/futuro
 m_nn.ROOT = ROOT / "futuro"                 # salidas en futuro/oof|preds|submissions (DATA y EXP no cambian)
 
 TEMPORAL_EXTRA = ["blk_pos", "blk_len", "gap_prev", "gap_next"]
+PREFIJOS = ("f_", "p_")
+if "--clear" in sys.argv:                   # + bloque clear (sx_*) de feat_clear.py
+    sys.argv.remove("--clear")
+    PREFIJOS += ("sx_",)
 _load_base = m_nn.load
 
 
 def temporal_cols(d):
-    return [c for c in d.columns if c.startswith(("f_", "p_"))] + TEMPORAL_EXTRA
+    return [c for c in d.columns if c.startswith(PREFIJOS)] + TEMPORAL_EXTRA
 
 
 def load_future():

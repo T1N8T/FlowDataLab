@@ -1,0 +1,6 @@
+[f5_clear_et] f5_clear_l63_10                CV top3 = 0.9113  min atco 0.778  std folds 0.018
+f5_clear_l63_10: CV 0.9113 (853s) base+logic+past+future+clear {'num_leaves': 63, 'min_child_samples': 100, 'extra_trees': True}
+[f5_stack] f5_clear_l63_10_ses            CV top3 = 0.9184  min atco 0.778  std folds 0.019
+f5_clear_l63_10_ses: CV anidada 0.9184 -> 0.9202 (+0.0017); por fold [(0.85, 1), (0.7, 3), (0.7, 1), (0.5, 1), (0.85, 1)]; final (0.7, 1)
+[f5_stack] suav_f5_clear_l63_10_ses       CV top3 = 0.9208  min atco 0.769  std folds 0.020
+FIN
