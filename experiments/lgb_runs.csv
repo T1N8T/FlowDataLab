@@ -13,3 +13,10 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 18:01,base+tipo_estado,tipo_estado,{},96,0.6549,0.0207,
 18:02,base+contexto,contexto,{},94,0.6551,0.0229,
 18:03,base+todos,snapshot+tipo+avion+tipo_estado+contexto,{},133,0.6477,0.0307,
+19:09,base,-,{},88,0.6513,0.0204,1 semillas.
+19:10,base+contexto,contexto,{},94,0.6551,0.0229,1 semillas.
+19:10,base+exit_coord,exit_coord,{},96,0.6506,0.0232,1 semillas.
+19:11,base+alerta,alerta,{},93,0.6571,0.023,1 semillas.
+19:11,base+deadline,deadline,{},92,0.651,0.0177,1 semillas.
+19:12,base+alerta+contexto,alerta+contexto,{},99,0.6596,0.0245,1 semillas.
+19:13,FINAL base+alerta+contexto,alerta+contexto,{},99,0.6569,0.029,2 semillas. Modelo guardado
