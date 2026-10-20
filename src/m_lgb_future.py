@@ -39,6 +39,8 @@ def parse(argv=None):
     ap.add_argument("--subsample", type=float, default=0.8)
     ap.add_argument("--colsample", type=float, default=0.7)
     ap.add_argument("--trunc", type=int, default=5, help="lambdarank_truncation_level")
+    ap.add_argument("--reg-lambda", type=float, default=0.0, help="regularización L2")
+    ap.add_argument("--objective", default="lambdarank", help="lambdarank o rank_xendcg")
     ap.add_argument("--folds", default="", help="solo estos folds, p.ej. '0' (pruebas rápidas; no guarda)")
     ap.add_argument("--quick", action="store_true", help="1 semilla y sin guardar oof/preds/submission")
     ap.add_argument("--tag", default="", help="nota libre para el registro de experimentos")
@@ -60,10 +62,11 @@ def build_data():
 
 
 def model(a, seed):
-    return lgb.LGBMRanker(objective="lambdarank", n_estimators=a.n_estimators, learning_rate=a.lr,
+    extra = dict(lambdarank_truncation_level=a.trunc) if a.objective == "lambdarank" else {}
+    return lgb.LGBMRanker(objective=a.objective, n_estimators=a.n_estimators, learning_rate=a.lr,
                           num_leaves=a.leaves, min_child_samples=a.min_child, subsample=a.subsample, subsample_freq=1,
-                          colsample_bytree=a.colsample, lambdarank_truncation_level=a.trunc, random_state=seed,
-                          verbose=-1, n_jobs=8)
+                          colsample_bytree=a.colsample, reg_lambda=a.reg_lambda, random_state=seed,
+                          verbose=-1, n_jobs=8, **extra)
 
 
 def fit(a, A, F, seed):
