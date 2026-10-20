@@ -6,8 +6,8 @@ Uso:  python src/features.py   -> escribe models/features.parquet (train+validat
 Bloques de features:
 - base: columnas originales
 - logic_*: reglas físicas / de decisión (deadline por tipo, factibilidad, EDF)
-- f_*: información futura de la sesión (siguiente input, tipo de ese input, desaparición de la tarea)
-- p_*: información pasada de la sesión (tarea nueva, deltas respecto al snapshot anterior)
+Regla 1: todo se calcula solo con filas del mismo sample_id. Las features con snapshots pasados/futuros (f_*, p_*)
+se quitaron; si se permiten, están en el commit 67a15bc (add_blocks, add_future, add_past).
 """
 import numpy as np, pandas as pd
 from pathlib import Path
@@ -20,10 +20,8 @@ TYPES = ['entry_conflict_resolution', 'exit_conflict_resolution', 'entry_coordin
          'return_to_route']
 ENTRY_TYPES, EXIT_TYPES = [0, 2, 4, 9], [1, 3, 5, 10]
 NEEDS_CONTROL = [1, 3, 6, 7, 8, 10, 12, 13]          # requieren dar instrucciones -> avión asumido
-ACTS = ["assume_control", "force_assume_control", "assign_level_clearance", "assign_lateral_clearance",
-        "initiate_transfer_of_control"]
 META = ['sample_id', 'target_index', 'session', 'atco', 'scenario', 'timestamp', 'task_name', 'row_index',
-        'cs', 't', 'split', 'fold', 'block']
+        'cs', 'split', 'fold']
 
 
 def load():
@@ -32,8 +30,7 @@ def load():
     te = pd.read_csv(DATA / "test.csv").assign(split="test", target_index=-1)
     d = pd.concat([tr, va, te], ignore_index=True)
     d["cs"] = [n[len(TYPES[t]) + 1:].split("_")[0] for n, t in zip(d.task_name, d.task_index)]
-    d["t"] = pd.to_timedelta(d.timestamp).dt.total_seconds()
-    return d.sort_values(["session", "t", "row_index"]).reset_index(drop=True)
+    return d.sort_values(["sample_id", "row_index"]).reset_index(drop=True)
 
 
 def add_folds(d):
@@ -45,16 +42,6 @@ def add_folds(d):
     return d
 
 
-def add_blocks(d):
-    """Bloque = racha de snapshots contiguos (hueco <= 4.5 s) de una sesión."""
-    st = d.drop_duplicates("sample_id")[["sample_id", "session", "t"]].sort_values(["session", "t"])
-    gap = st.groupby("session").t.diff()
-    st["block"] = (gap.isna() | (gap > 4.5)).cumsum()
-    st["blk_pos"] = st.groupby("block").cumcount()
-    st["blk_len"] = st.groupby("block").t.transform("size")
-    st["gap_prev"] = gap.fillna(999).clip(upper=999)
-    st["gap_next"] = st.groupby("session").t.diff(-1).abs().fillna(999).clip(upper=999)
-    return d.merge(st.drop(columns=["session", "t"]), on="sample_id")
 
 
 def add_logic(d):
@@ -95,65 +82,14 @@ def add_logic(d):
     return d
 
 
-def add_future(d):
-    """Señales de snapshots posteriores de la misma sesión (no usan etiquetas)."""
-    d = d.copy()
-    d["ev"] = np.where(d.a_since_flight < 3600, np.round(d.t - d.a_since_flight), np.nan)
-    # tipo de cada input: a_last_* del primer snapshot que lo registra
-    k = d.dropna(subset=["ev"]).sort_values("t").drop_duplicates(["session", "cs", "ev"])
-    acts = k[["a_last_" + a for a in ACTS]].values
-    k = k.assign(act=np.where(acts.max(1) == 1, acts.argmax(1), len(ACTS)))[["session", "cs", "ev", "act"]]
-    nxt, nxt2, nact = (np.full(len(d), np.nan) for _ in range(3))
-    for s, g in d.groupby("session"):
-        ks = k[k.session == s]
-        evs = {cs: (gg.ev.values, gg.act.values) for cs, gg in ks.sort_values("ev").groupby("cs")}
-        for cs, gi in g.groupby("cs").groups.items():
-            if cs not in evs: continue
-            e, a = evs[cs]
-            t = d.t.values[gi]
-            j = np.searchsorted(e, t + 1.5)
-            ok = j < len(e); ok2 = j + 1 < len(e)
-            idx = np.asarray(gi)
-            nxt[idx[ok]] = e[j[ok]] - t[ok]
-            nact[idx[ok]] = a[j[ok]]
-            nxt2[idx[ok2]] = e[j[ok2] + 1] - t[ok2]
-    d["f_next_input"], d["f_next_input2"], d["f_next_act"] = nxt, nxt2, nact
-    d["f_next_input_rk"] = d.groupby("sample_id").f_next_input.rank(method="min")
-    # ¿el siguiente input "encaja" con el tipo de tarea? (compatibilidad lógica, no aprendida)
-    compat = {4: [0, 1], 2: [0, 1], 5: [4], 12: [3], 13: [3], 10: [2], 3: [2, 3], 6: [2, 3], 1: [2, 3], 0: [0, 1, 2, 3],
-              7: [2, 3], 8: [2, 3]}
-    d["f_next_match"] = [float(a in compat.get(t, [])) if a == a else np.nan for t, a in zip(d.task_index, d.f_next_act)]
-    d["f_next_match_soon"] = d.f_next_match * (d.f_next_input <= 60)
-    # desaparición de la tarea / avión de la lista
-    d["f_task_end"] = d.groupby(["session", "task_name"]).t.transform("max") - d.t
-    d["f_cs_end"] = d.groupby(["session", "cs"]).t.transform("max") - d.t
-    d["f_task_end_rk"] = d.groupby("sample_id").f_task_end.rank(method="min")
-    d["f_task_end_rk_flight"] = d.groupby(["sample_id", "cs"]).f_task_end.rank(method="min")
-    # ¿sigue en el siguiente snapshot contiguo?
-    d["f_gone_next"] = ((d.f_task_end < d.gap_next - 0.5) & (d.gap_next <= 4.5)).astype(int)
-    # ¿termina la tarea dentro de este bloque contiguo (episodio)?
-    d["f_end_in_block"] = (d.f_task_end <= (d.blk_len - 1 - d.blk_pos) * 3.5).astype(int)
-    return d.drop(columns="ev")
 
 
-def add_past(d):
-    d = d.copy()
-    d["p_task_start"] = d.t - d.groupby(["session", "task_name"]).t.transform("min")
-    d["p_task_start_rk"] = d.groupby("sample_id").p_task_start.rank(method="min")
-    d["p_new_in_block"] = (d.p_task_start <= d.blk_pos * 3.5).astype(int)
-    for c in ["time_to_sector", "x_task_age", "a_since_flight"]:
-        d["p_d_" + c] = d[c] - d.groupby(["session", "task_name"])[c].shift()
-    d["p_since_any_rk"] = d.groupby("sample_id").a_since_flight.rank(method="min")
-    return d
 
 
 def build():
     d = load()
     d = add_folds(d)
-    d = add_blocks(d)
     d = add_logic(d)
-    d = add_future(d)
-    d = add_past(d)
     return d
 
 
@@ -168,12 +104,9 @@ def load_feats():
 
 
 def feature_sets(d):
-    base = [c for c in d.columns if c not in META and not c.startswith(("logic_", "f_", "p_"))
-            and c not in ("blk_pos", "blk_len", "gap_prev", "gap_next")]
+    base = [c for c in d.columns if c not in META and not c.startswith("logic_")]
     logic = [c for c in d.columns if c.startswith("logic_")]
-    fut = [c for c in d.columns if c.startswith("f_")]
-    past = [c for c in d.columns if c.startswith("p_")] + ["blk_pos", "blk_len", "gap_prev", "gap_next"]
-    return dict(base=base, logic=logic, future=fut, past=past)
+    return dict(base=base, logic=logic)
 
 
 if __name__ == "__main__":
