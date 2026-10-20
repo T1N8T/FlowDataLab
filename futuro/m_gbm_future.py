@@ -48,15 +48,16 @@ def parse(argv=None):
 # ----------------------------------------------------------------------------- modelos
 def xgb_fit_predict(a, A, F, preds_on, seed):
     import xgboost as xgb
-    def X(df):
-        x = df[F].copy()
-        x["task_index"] = pd.Categorical(x.task_index, categories=range(N_TYPES))
+    def X(df):   # task_index en one-hot (evita el camino categórico de xgboost 2.0, roto con numpy 2)
+        x = df[F].drop(columns="task_index").astype(np.float32)
+        for k in range(N_TYPES):
+            x[f"ti_{k}"] = (df.task_index.values == k).astype(np.float32)
         return x
     dev = dict(device="cpu" if a.cpu else "cuda") if int(xgb.__version__.split(".")[0]) >= 2 else \
         dict(tree_method="hist" if a.cpu else "gpu_hist")
     m = xgb.XGBRanker(objective="rank:ndcg", eval_metric="ndcg@3", n_estimators=a.n_estimators, learning_rate=a.lr,
                       max_depth=a.depth, min_child_weight=5, subsample=0.8, colsample_bytree=0.7, reg_lambda=1.0,
-                      tree_method="hist", enable_categorical=True, random_state=seed, **dev)
+                      tree_method="hist", random_state=seed, **dev)
     m.fit(X(A), A.target_index, qid=A.sample_id.values)
     return [m.predict(X(p)) for p in preds_on]
 
