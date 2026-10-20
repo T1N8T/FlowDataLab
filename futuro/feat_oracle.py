@@ -10,7 +10,8 @@ tarea se mira qué hicieron OTROS controladores en el mismo escenario y en el mi
     or_*_rk        rangos dentro del snapshot
 Variantes (feats(..., variant=)): "base" (lo de arriba), "B" + ventanas ±30/300/600 s, or_cs_ever y núcleo
 exp(-|Δt|/120) a la respuesta más cercana; "C" + ventanas ±60/180 s en tiempo relativo a la primera aparición del
-avión en la sesión (or_a*); "D" solo or_near180, or_dt, or_ever; "E" = B + C.
+avión en la sesión (or_a*); "D" solo or_near180, or_dt, or_ever; "E" = B + C; "coord" = base, pero solo en
+entry/exit_coordination (vacío en el resto de tipos).
 USA ETIQUETAS de otras sesiones -> se calcula por fold con feats(d, mats, fold_out): solo cuentan sesiones etiquetadas
 del mismo escenario, de folds != fold_out y de otro controlador que la fila. fold_out=None (modelo final y test):
 todas las sesiones etiquetadas salvo las del propio controlador.
@@ -116,7 +117,9 @@ def feats(d, mats, fold_out, variant="base"):
     rk = [c for c in o.columns if c not in ("or_dt",)]
     if variant == "D":
         return o[["or_near180", "or_dt", "or_ever"]]
-    if variant == "base":
+    if variant == "coord":
+        o.loc[~d.task_index.isin([2, 3]).values] = np.nan
+    if variant in ("base", "coord"):
         rk = ["or_ever", "or_near60", "or_near180", "or_cs_near60"]
     for c in rk:
         o[c + "_rk"] = o[c].groupby(d.sample_id).rank(ascending=False, method="min")

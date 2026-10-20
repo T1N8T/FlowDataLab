@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FUT = ROOT / "futuro"
 sys.path.insert(0, str(ROOT / "cv"))
 import features_future as ff
-import feat_session, feat_oracle
+import feat_session, feat_oracle, metricas
 from metric import report, save_outputs, hits, labels
 
 EXP = ROOT / "experiments"
@@ -46,6 +46,7 @@ def parse(argv=None):
     ap.add_argument("--colsample", type=float, default=0.7)
     ap.add_argument("--trunc", type=int, default=5, help="lambdarank_truncation_level")
     ap.add_argument("--reg-lambda", type=float, default=0.0, help="regularización L2")
+    ap.add_argument("--extra-trees", action="store_true", help="extra_trees de LightGBM (Juanma, sección 13)")
     ap.add_argument("--objective", default="lambdarank", help="lambdarank o rank_xendcg")
     ap.add_argument("--folds", default="", help="solo estos folds, p.ej. '0' (pruebas rápidas; no guarda)")
     ap.add_argument("--quick", action="store_true", help="1 semilla y sin guardar oof/preds/submission")
@@ -56,6 +57,7 @@ def parse(argv=None):
     ap.add_argument("--oraculo-var", default="base", help="variante del oráculo: base, B, C, D, E (feat_oracle.py)")
     ap.add_argument("--test-folds", action="store_true", help="test = media de los modelos de cada fold (no reentrena)")
     ap.add_argument("--sesion", action="store_true", help="segundo paso de sesión (feat_session.py) -> <name>_ses")
+    ap.add_argument("--ref", default="lgb_future_clear_ses", help="OOF de referencia (futuro/oof) para las métricas por sesión/controlador")
     ap.add_argument("--tag", default="", help="nota libre para el registro de experimentos")
     a = ap.parse_args(argv)
     if a.quick: a.seeds = 1
@@ -97,7 +99,7 @@ def model(a, seed):
     return lgb.LGBMRanker(objective=a.objective, n_estimators=a.n_estimators, learning_rate=a.lr,
                           num_leaves=a.leaves, min_child_samples=a.min_child, subsample=a.subsample, subsample_freq=1,
                           colsample_bytree=a.colsample, reg_lambda=a.reg_lambda, random_state=seed,
-                          verbose=-1, n_jobs=a.threads, **extra)
+                          extra_trees=a.extra_trees, verbose=-1, n_jobs=a.threads, **extra)
 
 
 def fit(a, A, F, seed):
@@ -116,11 +118,13 @@ def add_lengths(lab):
     return lab
 
 
-def log_run(a, cv, fold_cv, min_atco, n_feats, secs, saved):
+def log_run(a, m, n_feats, secs, saved):
+    """Registro de la ejecución: CV, peor controlador, mediana por sesión, escenarios y comparación con --ref
+    (futuro/metricas.py), más todos los argumentos."""
     EXP.mkdir(exist_ok=True)
-    row = dict(when=time.strftime("%Y-%m-%d %H:%M"), name=a.name, tag=a.tag, cv=round(cv, 4), min_atco=round(min_atco, 4),
-               **{f"fold{k}": round(v, 4) for k, v in fold_cv.items()}, n_feats=n_feats, secs=int(secs), saved=saved,
-               **{k: v for k, v in vars(a).items() if k not in ("name", "tag")})
+    row = dict(when=time.strftime("%Y-%m-%d %H:%M"), name=a.name, tag=a.tag,
+               **{k: (round(v, 4) if isinstance(v, float) else v) for k, v in m.items()},
+               n_feats=n_feats, secs=int(secs), saved=saved, **{k: v for k, v in vars(a).items() if k not in ("name", "tag")})
     with open(EXP / ".lgb_future_runs.lock", "w") as lock:        # varias pruebas a la vez en gpu.dsic
         fcntl.flock(lock, fcntl.LOCK_EX)
         old = pd.read_csv(LOG) if LOG.exists() else pd.DataFrame()
@@ -149,33 +153,40 @@ def run(a, data):
         print(f"  fold {f} ({time.time() - t0:.0f}s)", flush=True)
     done = ~np.isnan(oof)
     oof_df = lab.loc[done, ["sample_id", "row_index"]].assign(score=oof[done])
-    cv, fold_cv, min_atco = evaluate(a.name, oof_df, len(F))
+    ref = read_ref(a)
+    m = evaluate(a.name, oof_df, ref, a.ref)
     saved = not (a.quick or a.folds)
     if saved:
         pred = np.mean(pred_f, axis=0) if a.test_folds else \
             np.mean([fit(a, pd.concat([lab, O["lab"]], axis=1) if a.oraculo else lab, F, s).predict(te[F])
                      for s in range(a.seeds)], axis=0)
         save_outputs(a.name, oof_df, te[["sample_id", "row_index"]].assign(score=pred), out=FUT)
-    log_run(a, cv, fold_cv, min_atco, len(F), time.time() - t0, saved)
+    log_run(a, m, len(F), time.time() - t0, saved)
     if a.sesion and not a.folds:
         so, sp, w = feat_session.sesion(lab, oof, te, pred) if saved else feat_session.sesion(lab, oof)
         print(f"  pesos del segundo paso: {w}")
         ses = argparse.Namespace(**{**vars(a), "name": a.name + "_ses", "tag": (a.tag + " +sesion").strip()})
         oof_ses = lab[["sample_id", "row_index"]].assign(score=so)
-        cvs, fold_s, min_s = evaluate(ses.name, oof_ses, len(F))
+        ms = evaluate(ses.name, oof_ses, ref, a.ref)
         if saved:
             save_outputs(ses.name, oof_ses, te[["sample_id", "row_index"]].assign(score=sp), out=FUT)
-        log_run(ses, cvs, fold_s, min_s, len(F), time.time() - t0, saved)
-        return cvs
-    return cv
+        log_run(ses, ms, len(F), time.time() - t0, saved)
+        return ms["cv"]
+    return m["cv"]
 
 
-def evaluate(name, oof_df, n_feats):
-    h = hits(oof_df).rename("hit").reset_index().merge(labels(), on="sample_id")
-    cv, fold_cv, min_atco = h.hit.mean(), h.groupby("fold").hit.mean().to_dict(), h.groupby("atco").hit.mean().min()
-    print(f"{name}: CV top3 = {cv:.4f}   (min atco {min_atco:.3f})   " +
-          "  ".join(f"f{k}:{v:.3f}" for k, v in fold_cv.items()) + f"   {n_feats} features", flush=True)
-    return cv, fold_cv, min_atco
+def read_ref(a):
+    """OOF de referencia para comparar (None si no existe o si la CV no tiene todos los folds)."""
+    p = FUT / "oof" / f"{a.ref}.csv"
+    return pd.read_csv(p) if a.ref and p.exists() and not a.folds else None
+
+
+def evaluate(name, oof_df, ref=None, ref_name=""):
+    """Métricas de futuro/metricas.py (media, peor controlador, mediana por sesión, escenarios y, con ref,
+    sesiones/controladores que suben o bajan). Las imprime y las devuelve para el registro."""
+    m = metricas.metricas(oof_df, ref)
+    print(metricas.resumen(name, m, ref_name), flush=True)
+    return m
 
 
 def main():
