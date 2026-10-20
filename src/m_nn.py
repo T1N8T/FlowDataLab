@@ -9,6 +9,11 @@ m_nn.py · Pablo (A) · Transformer de conjunto sobre las tareas de un snapshot.
 - CV: GroupKFold por atco con Data/folds.csv. Dentro de cada fold se apartan 3 controladores para early stopping.
 - Test: modelos entrenados con train+validation completo durante la mediana de épocas óptimas de la CV.
 
+Opciones de las ideas del EDA (bloque 9 del notebook), desactivadas por defecto:
+    --rel       features relativas: z-score de columnas clave dentro del snapshot y dentro de snapshot×tipo
+    --same-ac   sesgo de atención aprendido entre tareas del mismo avión (avión sacado de task_name, solo para agrupar)
+    --drop-red  quitar una columna de cada par casi redundante (|rho| > 0.95, sección 6 del EDA)
+
 Uso:
     python src/m_nn.py                                  # configuración base, 3 semillas, guarda salidas
     python src/m_nn.py --quick --layers 2 --drop 0.3    # prueba rápida (1 semilla, no guarda salidas)
@@ -26,7 +31,18 @@ DEV = "cuda" if torch.cuda.is_available() else "cpu"
 N_TYPES = 14
 # Regla 4: nunca son features. task_index entra por embedding, no como número.
 NOT_FEATS = ["sample_id", "target_index", "session", "atco", "scenario", "timestamp", "task_name", "row_index",
-             "task_index", "split"]
+             "task_index", "split", "aircraft"]
+TYPES = ['entry_conflict_resolution', 'exit_conflict_resolution', 'entry_coordination', 'exit_coordination',
+         'assume_aircraft', 'transfer_aircraft', 'conflict_resolution', 'non_conformance_resolution',
+         'qos_improvement', 'entry_conditions', 'exit_conditions', 'aircraft_request', 'zone_conflict',
+         'return_to_route']
+# --rel: columnas que se comparan dentro del snapshot (EDA: importa la posición relativa, no el valor absoluto)
+REL_COLS = ["time_to_sector", "abs_time_to_sector", "x_task_age", "x_state_age", "a_since_flight",
+            "k_timeToExitPoint", "distance_to_zone", "time_to_MD"]
+# --drop-red: una columna de cada par con |rho| > 0.95 (EDA, sección 6); se quita la segunda
+REDUNDANT = ["k_clearedFLDelta", "k_isLocked", "distance_to_sector", "is_not_assumed",
+             "non_conformance_agreed_route_deviation_fl", "k_distanceToExitPoint", "x_in_sector_h", "l_rank_f0_type",
+             "a_last_initiate_transfer_of_control", "distance_to_MD", "approaching_sector"]
 
 
 # ----------------------------------------------------------------------------- datos
@@ -44,7 +60,22 @@ def load():
         folds = pd.DataFrame({"atco": atcos, "fold": [i % 5 for i in range(len(atcos))]})
     d["fold"] = d.atco.map(dict(zip(folds.atco, folds.fold))).fillna(-1).astype(int)
     d.loc[d.split == "test", "fold"] = -1
+    # avión de cada tarea (para --same-ac); conflictos nombran dos aviones: el primero es el de la tarea
+    d["aircraft"] = [n[len(TYPES[t]) + 1:].split("_")[0] for n, t in zip(d.task_name, d.task_index)]
     return d
+
+
+def add_relative(d):
+    """Columnas rel_s_* (z-score dentro del snapshot) y rel_t_* (dentro de snapshot × tipo). Solo filas del sample_id."""
+    d = d.copy()
+    d["abs_time_to_sector"] = d.time_to_sector.abs()
+    new = {}
+    for key, by in (("s", [d.sample_id]), ("t", [d.sample_id, d.task_index])):
+        g = d.groupby(by)[REL_COLS]
+        z = (d[REL_COLS] - g.transform("mean")) / g.transform("std")
+        for c in REL_COLS:
+            new[f"rel_{key}_{c}"] = z[c].where(d[c].notna()).fillna(0).clip(-5, 5)   # sin valor o solo -> 0
+    return pd.concat([d.drop(columns="abs_time_to_sector"), pd.DataFrame(new, index=d.index)], axis=1)
 
 
 def prep(d):
@@ -76,31 +107,43 @@ def pack(d, X, L):
     XT = np.zeros((S, L, X.shape[1]), np.float32); XT[s_idx, pos] = X
     T = np.zeros((S, L), np.int64); T[s_idx, pos] = d.task_index.values
     M = np.zeros((S, L), bool); M[s_idx, pos] = True
+    A = np.full((S, L), -1, np.int64)                   # id de avión dentro del snapshot (-1 = padding)
+    A[s_idx, pos] = d.groupby("sample_id", sort=False).aircraft.transform(lambda s: pd.factorize(s)[0]).values
     y = np.full(S, -1, np.int64)
     t = d.target_index.values == 1
     y[s_idx[t]] = pos[t]
     first = d.iloc[starts]
-    return dict(X=torch.tensor(XT), T=torch.tensor(T), M=torch.tensor(M), y=torch.tensor(y),
+    return dict(X=torch.tensor(XT), T=torch.tensor(T), M=torch.tensor(M), A=torch.tensor(A), y=torch.tensor(y),
                 s_idx=s_idx, pos=pos, atco=first.atco.values, fold=first.fold.values, sample_id=first.sample_id.values)
 
 
 def subset(P, idx):
-    return {k: P[k][idx] for k in "XTMy"}
+    return {k: P[k][idx] for k in "XTMAy"}
 
 
 # ----------------------------------------------------------------------------- modelo
 class SetRanker(nn.Module):
-    def __init__(self, nf, d=64, heads=4, layers=3, drop=0.2):
+    def __init__(self, nf, d=64, heads=4, layers=3, drop=0.2, same_ac=False):
         super().__init__()
+        self.heads = heads
+        # --same-ac: un sesgo aprendido por cabeza que se suma a la atención entre tareas del mismo avión
+        self.same_bias = nn.Parameter(torch.zeros(heads)) if same_ac else None
         self.inp = nn.Sequential(nn.Linear(nf, d), nn.GELU(), nn.Dropout(drop), nn.Linear(d, d))
         self.temb = nn.Embedding(N_TYPES, d)
         layer = nn.TransformerEncoderLayer(d, heads, 4 * d, drop, activation="gelu", batch_first=True, norm_first=True)
         self.enc = nn.TransformerEncoder(layer, layers, enable_nested_tensor=False)
         self.out = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, d), nn.GELU(), nn.Linear(d, 1))
 
-    def forward(self, X, T, M):
+    def forward(self, X, T, M, A):
         x = self.inp(X) + self.temb(T)
-        x = self.enc(x, src_key_padding_mask=~M)
+        if self.same_bias is None:
+            x = self.enc(x, src_key_padding_mask=~M)
+        else:
+            B, L = M.shape
+            same = ((A[:, :, None] == A[:, None, :]) & M[:, None, :]).to(x.dtype)
+            bias = same[:, None] * self.same_bias.to(x.dtype)[None, :, None, None]          # [B, h, L, L]
+            bias = bias.masked_fill(~M[:, None, None, :], float("-inf"))                    # padding como clave
+            x = self.enc(x, mask=bias.reshape(B * self.heads, L, L))
         return self.out(x).squeeze(-1).masked_fill(~M, -1e4)
 
 
@@ -108,7 +151,7 @@ class SetRanker(nn.Module):
 def logits(m, P, bs=1024):
     m.eval()
     idx = torch.arange(len(P["y"]))
-    return torch.cat([m(*(P[k][i].to(DEV) for k in "XTM")).float().cpu() for i in idx.split(bs)])
+    return torch.cat([m(*(P[k][i].to(DEV) for k in "XTMA")).float().cpu() for i in idx.split(bs)])
 
 
 def top3_from_logits(lg, y):
@@ -119,7 +162,7 @@ def top3_from_logits(lg, y):
 def train(tr, a, seed, es=None, epochs=None):
     """Entrena; con `es` hace early stopping y devuelve (modelo, mejor_época). Sin `es`, entrena `epochs` épocas."""
     torch.manual_seed(seed); np.random.seed(seed)
-    m = SetRanker(tr["X"].shape[-1], a.d, a.heads, a.layers, a.drop).to(DEV)
+    m = SetRanker(tr["X"].shape[-1], a.d, a.heads, a.layers, a.drop, a.same_ac).to(DEV)
     opt = torch.optim.AdamW(m.parameters(), lr=a.lr, weight_decay=a.wd)
     n_ep = epochs or a.epochs
     S = len(tr["y"])
@@ -129,10 +172,10 @@ def train(tr, a, seed, es=None, epochs=None):
     for ep in range(1, n_ep + 1):
         m.train()
         for i in torch.randperm(S).split(a.bs):
-            b = {k: tr[k][i].to(DEV, non_blocking=True) for k in "XTMy"}
+            b = {k: tr[k][i].to(DEV, non_blocking=True) for k in "XTMAy"}
             x = b["X"] + a.noise * torch.randn_like(b["X"]) if a.noise else b["X"]
             with torch.autocast(DEV, dtype=torch.bfloat16, enabled=DEV == "cuda"):
-                out = m(x, b["T"], b["M"])
+                out = m(x, b["T"], b["M"], b["A"])
             loss = nn.functional.cross_entropy(out.float(), b["y"], label_smoothing=a.ls)
             opt.zero_grad(set_to_none=True); loss.backward()
             nn.utils.clip_grad_norm_(m.parameters(), 1.0); opt.step(); sch.step()
@@ -185,6 +228,9 @@ def parse(argv=None):
     ap.add_argument("--folds", default="", help="solo estos folds, p.ej. '0' o '0,1' (pruebas rápidas)")
     ap.add_argument("--quick", action="store_true", help="1 semilla y sin guardar oof/preds/submission")
     ap.add_argument("--tag", default="", help="nota libre para el registro de experimentos")
+    ap.add_argument("--rel", action="store_true", help="features relativas dentro del snapshot y del tipo")
+    ap.add_argument("--same-ac", action="store_true", help="sesgo de atención entre tareas del mismo avión")
+    ap.add_argument("--drop-red", action="store_true", help="quitar columnas casi redundantes")
     a = ap.parse_args(argv)
     if a.quick: a.seeds = 1
     return a
@@ -192,7 +238,7 @@ def parse(argv=None):
 
 def build_data():
     """Carga y empaqueta una vez (el sweep lo reutiliza entre ejecuciones)."""
-    d = load()
+    d = add_relative(load())                            # las rel_* solo se usan con --rel (ver select)
     X, cols = prep(d)
     L = int(d.seq_len.max())
     lab_m = (d.split != "test").values
@@ -200,7 +246,19 @@ def build_data():
     PL, PT = pack(lab, X[lab_m], L), pack(te, X[~lab_m], L)
     print(f"{len(cols)} features por tarea, {len(PL['y'])} muestras etiquetadas, {len(PT['y'])} de test, L={L}", flush=True)
     assert (PL["y"] >= 0).all(), "hay muestras sin exactamente una respuesta"
-    return dict(lab=lab, te=te, PL=PL, PT=PT, folds_file=(DATA / "folds.csv").exists())
+    return dict(lab=lab, te=te, PL=PL, PT=PT, cols=cols, folds_file=(DATA / "folds.csv").exists())
+
+
+def select(data, a):
+    """Columnas que usa esta ejecución según --rel y --drop-red (los datos se cargan una vez con todas)."""
+    cols = data["cols"]
+    keep = [i for i, c in enumerate(cols) if (a.rel or not c.startswith("rel_"))
+            and not (a.drop_red and c.removesuffix("_nan") in REDUNDANT)]
+    print(f"  {len(keep)} de {len(cols)} columnas", flush=True)
+    if len(keep) == len(cols):
+        return data["PL"], data["PT"]
+    k = torch.tensor(keep)
+    return {**data["PL"], "X": data["PL"]["X"][..., k]}, {**data["PT"], "X": data["PT"]["X"][..., k]}
 
 
 def log_run(a, data, cv, by_atco, fold_cv, best_eps, secs, saved):
@@ -219,7 +277,8 @@ def run(a, data):
     t0 = time.time()
     print(f"\n=== {a.name} {a.tag}  device={DEV}  " + " ".join(f"{k}={v}" for k, v in vars(a).items()
                                                             if k not in ("name", "tag")), flush=True)
-    lab, te, PL, PT = data["lab"], data["te"], data["PL"], data["PT"]
+    lab, te = data["lab"], data["te"]
+    PL, PT = select(data, a)
     folds = sorted(np.unique(PL["fold"]))
     if a.folds: folds = [int(f) for f in a.folds.split(",")]
     oof = np.full(len(lab), np.nan); best_eps, fold_cv = [], {}
