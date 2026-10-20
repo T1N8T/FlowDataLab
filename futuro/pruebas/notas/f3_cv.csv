@@ -1,0 +1,17 @@
+nombre,cv,min_atco,std_folds,n_features,seeds,desc
+f3_ref,0.8996,0.7456,0.0231,125,1,todos
+f3_adv5,0.9008,0.7337,0.0201,120,1,"sin las 5 más delatoras: ['a_n300', 'seq_len', 'blk_len', 'logic_n_window', 'k_outCoordRevision']"
+f3_adv10,0.8997,0.7692,0.0183,115,1,"sin las 10 más delatoras: ['a_n300', 'seq_len', 'blk_len', 'logic_n_window', 'k_outCoordRevision', 'a_n60', 'x_state_age', 'k_groundSpeed', 'k_clearedFL', 'l_frac_type']"
+f3_imp30,0.8976,0.7396,0.0192,88,1,quita el 30% menos importante (gain+perm)
+f3_imp50,0.8964,0.7544,0.0197,62,1,quita el 50% menos importante (gain+perm)
+f3_best,0.9,0.7337,0.0179,115,3,"mejor selección (adv10), 3 semillas"
+f3_sin_logic,0.8974,0.7396,0.0191,111,1,sin bloque logic
+f3_sin_past,0.8969,0.7574,0.0196,114,1,sin bloque past
+f3_sin_future,0.661,0.5957,0.0282,113,1,sin bloque future
+f3_solo_fp,0.8757,0.7012,0.0196,24,1,solo future+past+task_index
+f3_sin_a,0.9023,0.7426,0.0206,113,1,sin base a_*
+f3_sin_x,0.8997,0.7396,0.0217,117,1,sin base x_*
+f3_sin_k,0.8942,0.7278,0.0214,93,1,sin base k_*
+f3_sin_l,0.9003,0.7633,0.0212,116,1,sin base l_*
+f3_sin_resto,0.8963,0.7367,0.0251,99,1,sin base resto (columnas originales salvo task_index)
+f3_best_sin_a,0.9,0.7485,0.0213,113,3,"sin base a_*, 3 semillas"

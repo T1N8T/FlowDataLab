@@ -1,0 +1,14 @@
+[f2_coord] f2_ref                         CV top3 = 0.8996  min atco 0.746  std folds 0.023
+   por tipo: {'exit_coordin': 0.5664, 'entry_coordi': 0.6994, 'exit_conditi': 0.7879, 'exit_conflic': 0.802, 'qos_improvem': 0.8327, 'conflict_res': 0.8487, 'return_to_ro': 0.8719, 'zone_conflic': 0.9184}
+[f2_coord] f2_cfut                        CV top3 = 0.8933  min atco 0.754  std folds 0.023
+   por tipo: {'exit_coordin': 0.5275, 'entry_coordi': 0.6498, 'exit_conditi': 0.7746, 'exit_conflic': 0.7716, 'qos_improvem': 0.8444, 'conflict_res': 0.8308, 'return_to_ro': 0.8762, 'zone_conflic': 0.9165}
+[f2_coord] f2_adri                        CV top3 = 0.8996  min atco 0.769  std folds 0.022
+   por tipo: {'exit_coordin': 0.5544, 'entry_coordi': 0.6957, 'exit_conditi': 0.7924, 'exit_conflic': 0.7665, 'qos_improvem': 0.8327, 'conflict_res': 0.8308, 'return_to_ro': 0.8698, 'zone_conflic': 0.9217}
+[f2_coord] f2_coord                       CV top3 = 0.8999  min atco 0.743  std folds 0.017
+   por tipo: {'exit_coordin': 0.5383, 'entry_coordi': 0.6994, 'exit_conditi': 0.779, 'exit_conflic': 0.797, 'qos_improvem': 0.8327, 'conflict_res': 0.8641, 'return_to_ro': 0.8698, 'zone_conflic': 0.9316}
+[f2_coord] f2_adri2                       CV top3 = 0.9000  min atco 0.734  std folds 0.023
+   por tipo: {'exit_coordin': 0.5557, 'entry_coordi': 0.706, 'exit_conditi': 0.7879, 'exit_conflic': 0.7817, 'qos_improvem': 0.8366, 'conflict_res': 0.8436, 'return_to_ro': 0.8837, 'zone_conflic': 0.9114}
+[f2_coord] f2_adri_clean                  CV top3 = 0.9016  min atco 0.754  std folds 0.023
+   por tipo: {'exit_coordin': 0.545, 'entry_coordi': 0.6882, 'exit_conditi': 0.7812, 'exit_conflic': 0.7563, 'qos_improvem': 0.8249, 'conflict_res': 0.8436, 'return_to_ro': 0.8869, 'zone_conflic': 0.9312}
+[f2_coord] f2_best                        CV top3 = 0.9008  min atco 0.757  std folds 0.022
+   por tipo: {'exit_coordin': 0.5611, 'entry_coordi': 0.6891, 'exit_conditi': 0.7902, 'exit_conflic': 0.7563, 'qos_improvem': 0.8327, 'conflict_res': 0.8385, 'return_to_ro': 0.8815, 'zone_conflic': 0.9236}

@@ -1,0 +1,166 @@
+fold 0 hecho 218s
+fold 1 hecho 2394s
+fold 2 hecho 2654s
+fold 3 hecho 2899s
+fold 4 hecho 3429s
+[h4_sel] h4_ref                         CV top3 = 0.6596  min atco 0.576  std folds 0.025
+/home/jm/proyectos/FlowDataLab/pruebas/h4_sel.py:55: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  imp = pd.DataFrame({"gain_medio": gain.mean(1), "gain_frac": gain.mean(1) / gain.mean(1).sum(),
+/home/jm/proyectos/FlowDataLab/pruebas/h4_sel.py:55: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  imp = pd.DataFrame({"gain_medio": gain.mean(1), "gain_frac": gain.mean(1) / gain.mean(1).sum(),
+/home/jm/proyectos/FlowDataLab/pruebas/h4_sel.py:55: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  imp = pd.DataFrame({"gain_medio": gain.mean(1), "gain_frac": gain.mean(1) / gain.mean(1).sum(),
+                                                      gain_medio  ...  rank_medio
+task_index                                          82830.378846  ...         1.0
+distance_to_sector                                  44556.175311  ...         2.0
+time_to_sector                                      40539.643581  ...         3.0
+x_task_age                                          27222.551774  ...         4.5
+k_timeToExitPoint                                   17379.402557  ...         5.0
+k_distanceToExitPoint                               17350.968471  ...         6.5
+a_since_flight                                      17922.573204  ...         6.5
+distance_to_zone                                    14673.367230  ...         9.0
+l_rank_absf1_all                                    14664.851893  ...        10.0
+non_conformance_agreed_route_deviation_horizont...  11270.038722  ...        10.0
+a_since_any                                         11853.141352  ...        12.5
+l_frac_type                                         11521.992785  ...        12.5
+l_rank_absf1_type                                    8589.236274  ...        14.0
+l_rank_age_type                                     10332.400955  ...        15.5
+k_headingClearanceAgeS                               9096.718986  ...        17.0
+k_groundSpeed                                        8638.453616  ...        19.0
+k_outCoordRevision                                  10419.806674  ...        19.5
+current_FL                                           5940.592038  ...        19.5
+exit_FL                                              6642.570536  ...        21.0
+a_n300                                               6730.371286  ...        21.5
+is_assumed                                           3292.017757  ...        23.5
+x_state_age                                         12264.924775  ...        23.5
+k_isAtExitFL                                         3606.602964  ...        24.0
+k_clearedFL                                          6351.796103  ...        25.5
+l_n_type                                             3508.983522  ...        25.5
+
+[25 rows x 7 columns]
+                               gain_medio  gain_frac  ...  rank_perm  rank_medio
+x_in_sector_h                  119.919980   0.000232  ...       62.0        73.5
+k_isClimbingToCFL              270.774384   0.000524  ...       69.0        74.0
+non_conformance_FL_delta       294.294451   0.000570  ...       75.0        75.5
+k_transferToolActivation       244.506013   0.000473  ...       74.0        77.0
+HMI_conflict_safety_alert      119.176667   0.000231  ...       71.0        78.5
+conflict_ind                    61.281081   0.000119  ...       67.0        79.5
+a_last_assign_level_clearance  508.565399   0.000985  ...       92.0        79.5
+k_isMaintainingFL              136.106349   0.000264  ...       76.0        80.0
+k_isPassingCFL                 408.664369   0.000791  ...       90.0        80.5
+CPA_exit_location              180.365577   0.000349  ...       85.0        83.0
+multiple_conflicts_ind          56.907542   0.000110  ...       73.0        83.5
+k_isClearedFLAssigned           86.079601   0.000167  ...       82.0        85.5
+k_out_COORDINATED              320.824626   0.000621  ...       96.0        85.5
+al_conflict_stca                60.913320   0.000118  ...       79.0        86.0
+k_isAtCFL                      336.952096   0.000652  ...       98.0        86.0
+al_conflict_multi               26.092090   0.000051  ...       79.0        87.0
+k_isDescendingToCFL            169.342088   0.000328  ...       93.0        87.5
+k_isLocked                     272.968498   0.000529  ...       97.0        87.5
+is_transferred                   0.000000   0.000000  ...       79.0        88.5
+k_trackAgeS                      0.000000   0.000000  ...       79.0        88.5
+a_last_decontrol                 0.000000   0.000000  ...       79.0        88.5
+CPA_entry_location             111.547694   0.000216  ...       91.0        89.0
+k_inSectorVertically            63.300280   0.000123  ...       87.0        89.0
+x_entry_coord_not_done          69.328588   0.000134  ...       89.0        89.5
+what_if_potential_conflict       3.531400   0.000007  ...       88.0        92.0
+
+[25 rows x 7 columns]
+test vs lab AUC 0.996
+a_n300                0.131642
+cx_n_assume_offer     0.115141
+cx_n_aircraft         0.111246
+seq_len               0.110452
+cx_n_entry_coord      0.101278
+cx_n_zone             0.070663
+cx_n_conflict         0.066790
+a_n60                 0.038421
+cx_n_transfer_due     0.033750
+k_outCoordRevision    0.031160
+x_state_age           0.024548
+a_since_any           0.023150
+dtype: float64
+023 vs lab AUC 0.999
+a_n300               0.147657
+seq_len              0.128874
+cx_n_entry_coord     0.115164
+cx_n_aircraft        0.111153
+cx_n_assume_offer    0.087707
+cx_n_zone            0.068295
+cx_n_conflict        0.054209
+a_since_any          0.037045
+x_state_age          0.032473
+a_n60                0.030796
+cx_n_transfer_due    0.020889
+al_n_stca            0.017497
+dtype: float64
+atco 20 vs resto AUC 1.000
+seq_len               0.146299
+cx_n_entry_coord      0.131214
+a_n300                0.120420
+cx_n_aircraft         0.120124
+cx_n_zone             0.105361
+cx_n_assume_offer     0.080529
+cx_n_conflict         0.043540
+k_outCoordRevision    0.040548
+dtype: float64
+atco 5 vs resto AUC 0.998
+cx_n_assume_offer     0.169046
+seq_len               0.112495
+cx_n_entry_coord      0.104822
+cx_n_aircraft         0.099988
+cx_n_zone             0.098805
+a_n300                0.094108
+cx_n_conflict         0.063262
+k_outCoordRevision    0.035068
+dtype: float64
+atco 15 vs resto AUC 0.999
+a_n300                0.133058
+seq_len               0.122005
+cx_n_entry_coord      0.112604
+cx_n_assume_offer     0.109049
+cx_n_aircraft         0.092569
+cx_n_zone             0.066934
+cx_n_conflict         0.059456
+k_outCoordRevision    0.052002
+dtype: float64
+atco 18 vs resto AUC 0.998
+a_n300               0.146459
+seq_len              0.108365
+cx_n_aircraft        0.099739
+cx_n_assume_offer    0.093872
+cx_n_entry_coord     0.092594
+cx_n_conflict        0.086934
+cx_n_zone            0.085725
+a_n60                0.040675
+dtype: float64
+atco 1 vs resto AUC 0.999
+a_n300               0.145420
+cx_n_zone            0.141148
+cx_n_aircraft        0.132268
+seq_len              0.126378
+cx_n_assume_offer    0.101398
+cx_n_entry_coord     0.094512
+a_n60                0.045684
+a_since_any          0.036535
+dtype: float64
+/home/jm/proyectos/FlowDataLab/pruebas/h4_sel.py:118: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  tab["media"] = tab.mean(1)
+                                                    test_vs_lab  ...     media
+a_n300                                                 0.131642  ...  0.131252
+seq_len                                                0.110452  ...  0.122124
+cx_n_aircraft                                          0.111246  ...  0.109584
+cx_n_assume_offer                                      0.115141  ...  0.108106
+cx_n_entry_coord                                       0.101278  ...  0.107456
+cx_n_zone                                              0.070663  ...  0.090990
+cx_n_conflict                                          0.066790  ...  0.057417
+a_n60                                                  0.038421  ...  0.037201
+k_outCoordRevision                                     0.031160  ...  0.033648
+a_since_any                                            0.023150  ...  0.031826
+x_state_age                                            0.024548  ...  0.025788
+cx_n_transfer_due                                      0.033750  ...  0.022957
+al_n_stca                                              0.018228  ...  0.014963
+non_conformance_agreed_route_deviation_horizont...     0.009334  ...  0.009714
+k_groundSpeed                                          0.015123  ...  0.008034
+
+[15 rows x 8 columns]

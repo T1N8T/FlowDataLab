@@ -1,0 +1,186 @@
+filas 474688  features 125
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:46: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["ac_n_tasks"] = g.size()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:47: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["ac_n_types"] = oh.sum(axis=1)
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:48: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a = a.reset_index()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:48: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a = a.reset_index()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:53: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["sn_n_aircraft"] = gs.cs.transform("size")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:55: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["y"] = g.target_index.max().values
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:46: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["ac_n_tasks"] = g.size()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:47: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["ac_n_types"] = oh.sum(axis=1)
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:48: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a = a.reset_index()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:48: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a = a.reset_index()
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:51: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"ra_{c}"] = gs[c].rank(method="min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:52: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a[f"da_{c}"] = a[c] - gs[c].transform("min")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:53: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["sn_n_aircraft"] = gs.cs.transform("size")
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:55: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  a["y"] = g.target_index.max().values
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:61: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  A["fold"] = A.sample_id.map(lab.groupby("sample_id").fold.first())
+[    12s] aviones 245509  features avión 424
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:118: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  A["lp1"] = np.nan
+[   131s] dos etapas fold 0
+[   235s] dos etapas fold 1
+[   338s] dos etapas fold 2
+[   415s] dos etapas fold 3
+[   490s] dos etapas fold 4
+/home/jm/proyectos/FlowDataLab/futuro/pruebas/f4_two_stage.py:126: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  As["r"] = As.groupby("sample_id").cumcount()
+[   491s] etapa 1: top1 avión 0.8431 top3 avión 0.9338 | etapa 2 top1 en avión 0.8924
+[   493s]   w=0.5: CV 0.8875
+[   494s]   w=1.0: CV 0.8902
+[   495s]   w=1.5: CV 0.8904
+[   497s]   w=2.0: CV 0.8874
+[f4_2etapas] f4_two_stage                   CV top3 = 0.8902  min atco 0.725  std folds 0.022
+[   766s] variante fold 0
+[   961s] variante fold 1
+[  1130s] variante fold 2
+[  1329s] variante fold 3
+[  1583s] variante fold 4
+[f4_2etapas] f4_stage1_feat                 CV top3 = 0.8951  min atco 0.746  std folds 0.024
+[  1828s] f4_two_stage: corr aciertos 0.778 ambos 0.875 solo él 0.015 solo ref 0.026 oráculo 0.9165 spearman 0.816
+[  1830s]    mezcla rangos 0.2·f4_two_stage + 0.8·lgb_future: 0.9013
+[  1831s]    mezcla rangos 0.3·f4_two_stage + 0.7·lgb_future: 0.9015
+[  1831s]    mezcla rangos 0.5·f4_two_stage + 0.5·lgb_future: 0.9003
+[  1833s] f4_stage1_feat: corr aciertos 0.804 ambos 0.880 solo él 0.015 solo ref 0.021 oráculo 0.9161 spearman 0.902
+[  1834s]    mezcla rangos 0.2·f4_stage1_feat + 0.8·lgb_future: 0.9007
+[  1835s]    mezcla rangos 0.3·f4_stage1_feat + 0.7·lgb_future: 0.9008
+[  1836s]    mezcla rangos 0.5·f4_stage1_feat + 0.5·lgb_future: 0.8998
+[  1836s] fin

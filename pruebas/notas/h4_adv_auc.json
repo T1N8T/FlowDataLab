@@ -1,0 +1,9 @@
+{
+ "test_vs_lab": 0.9964,
+ "023_vs_lab": 0.9988,
+ "atco20_vs_resto": 0.9999,
+ "atco5_vs_resto": 0.9984,
+ "atco15_vs_resto": 0.9992,
+ "atco18_vs_resto": 0.998,
+ "atco1_vs_resto": 0.999
+}
