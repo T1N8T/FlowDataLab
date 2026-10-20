@@ -45,3 +45,6 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 00:14,b12/R=25,alerta+contexto,{},99,0.6554,,2 semillas. peor_atco 0.566. sin 81 snapshots al entrenar. quitar casos extremos
 00:15,b12/R=15,alerta+contexto,{},99,0.6622,,2 semillas. peor_atco 0.576. sin 613 snapshots al entrenar. quitar intermedio
 00:16,b12/R=10,alerta+contexto,{},99,0.6649,,2 semillas. peor_atco 0.560. sin 1266 snapshots al entrenar. quitar todo lo de fuera del top-10
+00:45,b12b/sin_limpiar,alerta+contexto,{},99,0.6569,,"2 semillas. peor_atco 0.570. filtro ANIDADO, 0 quitados por fold de media"
+00:45,b12b/R=15,alerta+contexto,{},99,0.6566,,"2 semillas. peor_atco 0.563. filtro ANIDADO, 711 quitados por fold de media"
+00:45,b12b/R=10,alerta+contexto,{},99,0.6522,,"2 semillas. peor_atco 0.541. filtro ANIDADO, 1400 quitados por fold de media"
