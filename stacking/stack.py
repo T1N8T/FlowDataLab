@@ -9,10 +9,13 @@ stack.py · Juanma (C) · Combina los modelos de oof/ y preds/ (formato común s
 
 Solo entran los modelos que tienen oof/<m>.csv Y preds/<m>.csv (salvo --oof-only, que vale para medir CV).
 Se ignoran los propios stack_*.
+Con --futuro también entran los modelos de futuro/oof|preds (usan otros snapshots, rompen la regla 1) y las salidas
+se guardan en futuro/ en vez de en la raíz.
 
 Uso:  python stacking/stack.py                       # todos los modelos disponibles
       python stacking/stack.py lgb_rank nn_base     # solo esos
       python stacking/stack.py --oof-only           # incluye modelos sin preds (solo CV, no guarda)
+      python stacking/stack.py --futuro             # + modelos de futuro/, guarda en futuro/oof|preds|submissions
 Salidas: oof|preds/stack_avg.csv, stack_meta.csv y submissions/sub_stack_avg.csv, sub_stack_meta.csv
 """
 import sys, numpy as np, pandas as pd, lightgbm as lgb
@@ -23,13 +26,16 @@ sys.path.insert(0, str(ROOT / "cv"))
 from metric import report, save_outputs, labels
 
 DATA = ROOT / "Data"
+FUT = ROOT / "futuro"
+DIRS = [ROOT, FUT] if "--futuro" in sys.argv else [ROOT]   # dónde se buscan oof/ y preds/
+OUT = DIRS[-1]
 CTX = ["task_index", "l_twin_AE", "seq_len"]
 
 
 # ----------------------------------------------------------------------------- carga
 def available(names, oof_only):
-    oofs = {p.stem for p in (ROOT / "oof").glob("*.csv") if not p.stem.startswith("stack")}
-    preds = {p.stem for p in (ROOT / "preds").glob("*.csv")} if (ROOT / "preds").exists() else set()
+    oofs = {p.stem for r in DIRS for p in (r / "oof").glob("*.csv") if not p.stem.startswith(("stack", "sub_"))}
+    preds = {p.stem for r in DIRS for p in (r / "preds").glob("*.csv")}
     ok = sorted(oofs if oof_only else oofs & preds)
     if names:
         miss = set(names) - set(ok)
@@ -55,7 +61,8 @@ def base_rows(split):
 
 def attach(d, models, folder):
     for m in models:
-        s = pd.read_csv(ROOT / folder / f"{m}.csv").rename(columns={"score": m})
+        s = pd.read_csv(next(r / folder / f"{m}.csv" for r in DIRS if (r / folder / f"{m}.csv").exists()))
+        s = s.rename(columns={"score": m})
         n0 = len(d)
         d = d.merge(s, on=["sample_id", "row_index"], how="left")
         assert len(d) == n0
@@ -194,7 +201,7 @@ def main():
     best_avg = max(("stack_avg_lsm", "stack_avg_rpct"), key=lambda k: hit3(lab, results[k][0]))
     for name, key in (("stack_avg", best_avg), ("stack_meta", "stack_meta")):
         o, p = results[key]
-        save_outputs(name, out(lab, o), out(te, p))
+        save_outputs(name, out(lab, o), out(te, p), out=OUT)
     print(f"stack_avg = {best_avg}")
 
 

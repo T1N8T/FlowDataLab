@@ -1,0 +1,10 @@
+when,name,tag,cv,min_atco,fold0,fold1,fold2,fold3,fold4,n_feats,secs,saved,seeds,feats,n_estimators,lr,leaves,min_child,subsample,colsample,trunc,reg_lambda,objective,folds,quick
+2026-10-20 19:18,feats/base,referencia,0.8996,0.7456,0.9356,0.8883,0.8733,0.8991,0.905,125,52,False,1,"base,logic,past,future",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:19,feats/sin_future,¿cuánto aporta el futuro?,0.661,0.5957,0.6907,0.687,0.6619,0.6314,0.6338,113,42,False,1,"base,logic,past",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:20,feats/sin_past,¿cuánto aporta el pasado?,0.8969,0.7574,0.9287,0.885,0.8777,0.8947,0.901,114,47,False,1,"base,logic,future",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:21,feats/sin_logic,¿sobran las reglas a mano?,0.8974,0.7396,0.9295,0.8832,0.8835,0.8923,0.901,111,48,False,1,"base,past,future",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:23,params/base,referencia,0.8996,0.7456,0.9356,0.8883,0.8733,0.8991,0.905,125,53,False,1,"base,logic,past,future",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:25,params/lento,más lento con más árboles (Adri),0.9003,0.7633,0.9344,0.8883,0.8839,0.8906,0.9064,125,89,False,1,"base,logic,past,future",700,0.03,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 19:26,params/regularizado,"hojas grandes, menos columnas, L2 (Adri)",0.8995,0.7751,0.9348,0.8937,0.8853,0.8874,0.8984,125,70,False,1,"base,logic,past,future",400,0.05,31,100,0.8,0.5,5,5.0,lambdarank,,True
+2026-10-20 19:27,params/xendcg,otra pérdida de ranking (Adri),0.8863,0.74,0.9331,0.876,0.8634,0.8825,0.8805,125,39,False,1,"base,logic,past,future",400,0.05,31,50,0.8,0.7,5,0.0,rank_xendcg,,True
+2026-10-20 19:35,"comb/min_child=100,colsample=0.5,reg_lambda=5.0,lr=0.03,n_estimators=700",combinación de ganadores,0.9005,0.7663,0.938,0.8937,0.8835,0.8854,0.9039,125,356,False,3,"base,logic,past,future",700,0.03,31,100,0.8,0.5,5,5.0,lambdarank,,True

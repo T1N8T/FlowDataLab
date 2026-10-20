@@ -50,7 +50,7 @@ Cada persona trabaja en su rama de git. Los CSV grandes se comparten por carpeta
 - Usando snapshots futuros (siguiente input del controlador sobre el avión, a partir de `a_since_flight`): 0.83. **No permitido por ahora.**
 
 ## Ojo
-- Todo el código con snapshots pasados/futuros (features `f_*`/`p_*`, `baseline_ranker.py`, `train.py`, `transformer.py`, clogit `--future`) se ha quitado del repo. Si se permite, recuperarlo del commit `67a15bc`.
+- Los modelos con snapshots pasados/futuros viven en `futuro/` (ver `futuro/README.md`) y guardan en `futuro/oof|preds|submissions`; `stacking/stack.py` solo los usa con `--futuro`. El resto del flujo de `main` no cambia.
 - Las etiquetas tienen ruido y los controladores no coinciden mucho entre sí: el techo está bastante por debajo de 1. Preferir modelos robustos a los sobreajustados.
 
 ## Cómo trabajar con Claude en este repo
