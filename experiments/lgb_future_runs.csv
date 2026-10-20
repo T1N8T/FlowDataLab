@@ -20,3 +20,11 @@ when,name,tag,cv,min_atco,fold0,fold1,fold2,fold3,fold4,n_feats,secs,saved,seeds
 2026-10-20 22:16,lgb_future_v2,3s +coord+clear,0.9045,0.7722,0.9501,0.8923,0.8868,0.8939,0.9028,147,164,True,3,"base,logic,past,future,coord,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,
 2026-10-20 22:55,lgb_future_clear,3s +clear,0.9071,0.7692,0.9489,0.8934,0.8941,0.8971,0.905,135,188,True,3,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
 2026-10-20 22:55,lgb_future_clear_ses,3s +clear +sesion,0.9142,0.7811,0.9525,0.8966,0.9055,0.9064,0.9126,135,204,True,3,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
+2026-10-20 22:58,sesion/colsample05,1.er pase con menos columnas por árbol,0.9066,0.7544,0.9452,0.8912,0.8945,0.8959,0.909,135,99,False,1,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.5,5,0.0,lambdarank,,True,True
+2026-10-20 22:58,sesion/colsample05_ses,1.er pase con menos columnas por árbol +sesion,0.9125,0.7751,0.9525,0.8974,0.8993,0.9036,0.9126,135,122,False,1,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.5,5,0.0,lambdarank,,True,True
+2026-10-20 23:00,sesion/base,referencia 1 semilla,0.9057,0.7574,0.9476,0.8868,0.8963,0.891,0.9094,135,62,False,1,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True,True
+2026-10-20 23:01,sesion/base_ses,referencia 1 semilla +sesion,0.9132,0.7781,0.9553,0.8926,0.9026,0.9028,0.9156,135,90,False,1,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True,True
+2026-10-20 23:01,lgb_future_coord,3s +coord+clear,0.9045,0.7722,0.9501,0.8923,0.8868,0.8939,0.9028,147,277,True,3,"base,logic,past,future,coord,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
+2026-10-20 23:01,lgb_future_coord_ses,3s +coord+clear +sesion,0.9123,0.7722,0.9613,0.8952,0.9,0.9012,0.9075,147,301,True,3,"base,logic,past,future,coord,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
+2026-10-20 23:06,lgb_future_clear10,10s +clear,0.9086,0.7751,0.9529,0.8948,0.8945,0.8991,0.905,135,603,True,10,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
+2026-10-20 23:07,lgb_future_clear10_ses,10s +clear +sesion,0.9158,0.7811,0.9565,0.8977,0.904,0.9101,0.9141,135,620,True,10,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False,True
