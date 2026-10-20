@@ -8,7 +8,7 @@ m_lgb_future.py · Pablo (A) · RAMA "futuro" · LightGBM LambdaRank con informa
     past   = p_*, blk_*, gap_*              future = f_* (siguiente instrucción, desaparición de la tarea...)
 - Parámetros base de EQUIPO.md (modelo de referencia), task_index categórica. Media de varias semillas.
 - CV con Data/folds.csv; test entrenado con train+validation. Salidas con cv/metric.save_outputs (formato común).
-- Cada ejecución se apunta en experiments/lgb_future_runs.csv. Notebook: futuro/LGB_futuro_pablo.ipynb.
+- Cada ejecución se apunta en experiments/lgb_future_runs.csv. Notebook: futuro/LGB_futuro.ipynb.
 
 Uso:
     python futuro/m_lgb_future.py                                   # 3 semillas, guarda oof/preds/submissions

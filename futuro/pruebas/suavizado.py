@@ -4,10 +4,10 @@ suavizado.py · Juanma (C) · Suavizado temporal de las predicciones (rompe la r
 Hay un snapshot cada ~3 s y el controlador suele seguir con la misma tarea varios seguidos. Se mezcla el score de
 cada tarea con el de la MISMA tarea (session, task_name) en los k snapshots anteriores y siguientes de la misma racha
 (block de features_future), con pesos que decaen con la distancia. Dos métodos:
-- suavizar_prob (el de Pablo, 5b de LGB_futuro_pablo; el que usa main() porque gana en CV anidada):
+- suavizar_prob (el de Pablo, 5b de LGB_futuro.ipynb; el que usa main() porque gana en CV anidada):
     p'(t) = (p(t) + Σ_j decay^j · p(t±j)) / (1 + Σ_j decay^j · [la tarea está en ese vecino]),  p = softmax del score
 - suavizar (log): s'(t) = lsm(t) + a · Σ_j decay^(j-1) · [lsm(t-j) + lsm(t+j)],  lsm = log-softmax del score
-CV anidada (futuro/LGB_futuro_juanma.ipynb, sección 7): lgb_future 0.9010 -> 0.9042 (prob) / 0.9033 (log);
+CV anidada (futuro/LGB_futuro.ipynb, sección 7): lgb_future 0.9010 -> 0.9042 (prob) / 0.9033 (log);
 nn_future 0.8874 -> 0.8973 (prob) / 0.8776 (log). Sin fuga: los vecinos son de la misma sesión, así que del mismo controlador y fold, y
 sus scores OOF tampoco vieron la etiqueta. Test: igual, con preds/ (no usa etiquetas).
 
@@ -64,7 +64,7 @@ def suavizar(base, nb, a, decay, k):
 
 
 def suavizar_prob(p, nb, decay, k):
-    """Variante de Pablo (LGB_futuro_pablo, 5b): media ponderada de PROBABILIDADES de la misma tarea en los ±k
+    """Variante de Pablo (LGB_futuro.ipynb, 5b): media ponderada de PROBABILIDADES de la misma tarea en los ±k
     vecinos, normalizada por los vecinos presentes: (p(t) + Σ decay^j p(t±j)) / (1 + Σ decay^j [presente])."""
     num, den = p.copy(), np.ones_like(p)
     for j in range(1, k + 1):

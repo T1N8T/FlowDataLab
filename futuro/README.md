@@ -23,4 +23,4 @@ python futuro/m_nn_future.py
 python linear/m_linear.py --future
 python stacking/stack.py --futuro      # -> futuro/submissions/sub_stack_avg.csv, sub_stack_meta.csv
 ```
-Notebooks: `LGB_futuro_pablo.ipynb`, `NN_futuro_pablo.ipynb` (el de la red es `notebooks/NN_pablo.ipynb` + sección 8).
+Notebooks: `LGB_futuro.ipynb` (LightGBM con futuro, Pablo + Juanma; arriba el punto de partida actual), `NN_futuro_pablo.ipynb` (el de la red es `notebooks/NN_pablo.ipynb` + sección 8).
