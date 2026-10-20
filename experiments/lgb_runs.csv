@@ -48,3 +48,7 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 00:45,b12b/sin_limpiar,alerta+contexto,{},99,0.6569,,"2 semillas. peor_atco 0.570. filtro ANIDADO, 0 quitados por fold de media"
 00:45,b12b/R=15,alerta+contexto,{},99,0.6566,,"2 semillas. peor_atco 0.563. filtro ANIDADO, 711 quitados por fold de media"
 00:45,b12b/R=10,alerta+contexto,{},99,0.6522,,"2 semillas. peor_atco 0.541. filtro ANIDADO, 1400 quitados por fold de media"
+00:52,b12c/base,alerta+contexto,{},99,0.6569,,"2 semillas. peor_atco 0.570. sin 0 snapshots al entrenar. referencia: lgb_adri (alerta+contexto), 2 semillas"
+00:54,b12c/l63_mc100,alerta+contexto,"{'num_leaves': 63, 'min_child_samples': 100}",99,0.6515,,2 semillas. peor_atco 0.554. sin 0 snapshots al entrenar. idea Pablo 12a
+00:55,b12c/l63_mc100_et,alerta+contexto,"{'num_leaves': 63, 'min_child_samples': 100, 'extra_trees': True}",99,0.6559,,2 semillas. peor_atco 0.565. sin 0 snapshots al entrenar. idea Juanma 13a: 63 hojas + extra_trees
+00:56,b12c/peso_tramo,alerta+contexto,{},99,0.6631,,2 semillas. peor_atco 0.576. sin 0 snapshots al entrenar. peso tramo^0.5. idea Pablo 11e: 1/sqrt(longitud del tramo)
