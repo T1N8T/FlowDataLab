@@ -12,3 +12,4 @@ when,name,tag,cv,min_atco,fold0,fold1,fold2,fold3,fold4,n_feats,secs,saved,seeds
 2026-10-20 21:56,nuevos/+coord,cambios futuros de coordinación/assume/transfer,0.901,0.7692,0.9356,0.8901,0.8861,0.8906,0.905,137,60,False,1,"base,logic,past,future,coord",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
 2026-10-20 21:57,nuevos/+clear,cambios futuros de instrucciones,0.9057,0.7574,0.9476,0.8868,0.8963,0.891,0.9094,135,54,False,1,"base,logic,past,future,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
 2026-10-20 21:58,nuevos/+coord+clear,los dos bloques nuevos,0.9054,0.7751,0.9452,0.8926,0.8971,0.8915,0.9028,147,61,False,1,"base,logic,past,future,coord,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,True
+2026-10-20 22:05,lgb_future_coord,"versión stacking futuro: base,logic,past,future,coord,clear",0.9045,0.7722,0.9501,0.8923,0.8868,0.8939,0.9028,147,222,True,3,"base,logic,past,future,coord,clear",400,0.05,31,50,0.8,0.7,5,0.0,lambdarank,,False
