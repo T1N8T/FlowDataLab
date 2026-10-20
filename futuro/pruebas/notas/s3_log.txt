@@ -1,0 +1,2 @@
+f2_adri: semilla 0 reaprovechada de f2_adri.csv
+[s3] f2_adri_s3                     CV top3 = 0.8993  min atco 0.760  std folds 0.024

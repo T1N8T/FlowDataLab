@@ -45,7 +45,7 @@ Todos pueden usar las máquinas del DSIC-UPV para lanzar lo pesado: bluenote.dsi
 4. **Columnas que no son features:** `sample_id`, `target_index`, `session`, `atco`, `scenario`, `timestamp`, `task_name`. `row_index` solo si el EDA demuestra que aporta.
 5. Se entrena con `train.csv` + `validation.csv` juntos.
 6. **Nadie sube a Kaggle salvo Juanma.**
-7. El código con snapshots futuros/pasados se ha quitado; si se permite, está en el commit `67a15bc`.
+7. Los modelos con snapshots futuros/pasados viven en `futuro/` (ver `futuro/README.md`) y guardan en `futuro/oof|preds|submissions`; `stacking/stack.py` solo los usa con `--futuro`. No tocar `oof/`/`preds/` con ellos.
 
 ### Formato común de salidas (para poder combinar modelos)
 Cada modelo genera tres archivos:

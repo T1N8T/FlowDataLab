@@ -13,6 +13,7 @@ score(tarea) = b[tipo] + x·w + x·W[tipo]      P(tarea) = softmax de score dent
 Uso:  python linear/m_linear.py                 # CV + oof/linear.csv, preds/linear.csv, submissions/sub_linear.csv
       python linear/m_linear.py --quick         # solo CV
       python linear/m_linear.py --lw 1e-3 --lW 1e-2
+      python linear/m_linear.py --future        # + columnas de otros snapshots (rompe la regla 1) -> futuro/oof/linear_future.csv
 """
 import sys, time, argparse, numpy as np, pandas as pd, torch
 from pathlib import Path
@@ -20,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "cv"))
 sys.path.insert(0, str(ROOT / "hierarchical"))
+sys.path.insert(0, str(ROOT / "futuro"))
 from metric import report, save_outputs
 from m_types import load, NOT_FEATS, N_TYPES
 
@@ -93,9 +95,14 @@ def main():
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--lw", type=float, default=1e-3)
     ap.add_argument("--lW", type=float, default=1e-2)
+    ap.add_argument("--future", action="store_true")
     args = ap.parse_args()
+    name = NAME + ("_future" if args.future else "")
 
     d = load()
+    if args.future:
+        from temporal import add_temporal
+        d = add_temporal(d)
     F = [c for c in d.columns if c not in NOT_FEATS + ["task_index"]]
     lab = (d.split != "test").values
     print(f"{len(F)} features, dispositivo {DEV}, lw={args.lw} lW={args.lW}", flush=True)
@@ -107,14 +114,14 @@ def main():
         oof[te] = fit_predict(d, F, tr, te, args)
         print(f"  fold {f}: {time.time() - t0:.0f}s", flush=True)
     oof_df = pd.DataFrame({"sample_id": d.sample_id, "row_index": d.row_index, "score": oof})[lab]
-    report(oof_df, NAME)
+    report(oof_df, name)
     if args.quick:
         return
 
     te = ~lab
     preds_df = pd.DataFrame({"sample_id": d.sample_id[te], "row_index": d.row_index[te],
                              "score": fit_predict(d, F, lab, te, args)})
-    save_outputs(NAME, oof_df, preds_df)
+    save_outputs(name, oof_df, preds_df, out=ROOT / "futuro" if args.future else ROOT)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+[h4_sel] h4_sin_low20_n                 CV top3 = 0.6596  min atco 0.591  std folds 0.023

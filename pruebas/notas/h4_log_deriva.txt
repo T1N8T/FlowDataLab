@@ -1,0 +1,3 @@
+/home/jm/proyectos/FlowDataLab/pruebas/h4_sel.py:158: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  s = (tab["test_vs_lab"] + tab["023_vs_lab"]) / 2 + 0.5 * tab.filter(like="atco").mean(1)
+[h4_sel] h4_sin_deriva                  CV top3 = 0.6521  min atco 0.571  std folds 0.021

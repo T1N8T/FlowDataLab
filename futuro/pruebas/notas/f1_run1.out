@@ -1,0 +1,4 @@
+[f1_lgb] f1_ref                         CV top3 = 0.8996  min atco 0.746  std folds 0.023
+f1_ref: CV 0.8996 (204s) {} seeds=[0]
+[f1_lgb] f1_binary                      CV top3 = 0.8940  min atco 0.760  std folds 0.021
+f1_binary: CV 0.8940 (183s) {'objective': 'binary'} seeds=[0]

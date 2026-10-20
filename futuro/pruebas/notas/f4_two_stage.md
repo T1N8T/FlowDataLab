@@ -1,0 +1,22 @@
+# f4_two_stage · hilo f4_2etapas (avión -> tarea, CON futuro)
+
+- **Diseño.** Igual que h5, pero con los 4 bloques de base_fut (125 features).
+  - Etapa 1: una fila por (sample_id, cs) y 424 features: min/max/mean de las tareas del avión, multi-hot de tipos, nº de tareas, y rangos/diferencias dentro del snapshot de los agregados clave (f_next_input_min, f_next_act_min, f_task_end_min, logic_edf_rank_min...). LambdaRank con group=sample_id.
+  - Etapa 2: LambdaRank sobre filas con group=(sample_id, cs), solo aviones con la correcta y más de una tarea.
+  - Score = log P(avión) + log P(tarea|avión). En cada fold se entrena solo con los folds de entrenamiento.
+- **Acierto de las etapas (OOF).**
+  - Etapa 1: avión correcto top-1 en el **84.3 %** (sin futuro, 36.7 %) y top-3 en el **93.4 %** (antes, 72.0 %).
+  - Etapa 2: tarea correcta dentro del avión correcto en el **89.2 %** (antes, 81.5 %).
+  - Con futuro el cuello de botella pasa a ser la etapa 2.
+- **f4_two_stage.** CV **0.8902**, peor controlador 0.725, desviación entre folds 0.022. Tiene preds de test.
+  - Peso de la etapa 2 (w): 0.5 / 1 / 1.5 / 2 dan 0.8875 / 0.8902 / 0.8904 / 0.8874; se queda w=1.
+  - Queda por debajo de lgb_future (0.9010 con 3 semillas; f2_ref con 1 semilla, 0.8996) y su peor controlador es peor (0.725 frente a 0.769).
+- **f4_stage1_feat.** El LightGBM de filas con todos los bloques (1 semilla), más log P(avión) de un OOF anidado (4 sub-folds, 150 árboles) y su rango.
+  - CV **0.8951**, peor controlador 0.746. Tiene preds de test.
+  - Empeora a f2_ref (0.8996, misma semilla): P(avión) como feature no aporta, porque el ranker de filas ya ve f_next_input y sus rangos.
+- **Correlación con lgb_future (futuro/oof).**
+  - two_stage: correlación de aciertos 0.778, Spearman 0.816. Aciertan los dos en el 87.5 %, solo él en el 1.5 %, solo lgb_future en el 2.6 %. Oráculo **0.9165**.
+  - stage1_feat: correlación de aciertos 0.804, Spearman 0.902, oráculo 0.9161.
+- **Mezcla de rangos con lgb_future** (sobre el mismo OOF, peso no fiable): 0.2·two_stage da 0.9013, 0.3 da 0.9015, 0.5 da 0.9003, frente a 0.9010 de lgb_future solo. Con stage1_feat: 0.9007 / 0.9008 / 0.8998.
+- **Conclusión.** El dos etapas con futuro es un modelo bueno y algo diferente: Spearman 0.82 con lgb_future, el menos correlacionado de los que tenemos. Pero la mezcla solo añade ~+0.0005, dentro del ruido. Para el stacking se puede meter f4_two_stage con peso bajo; f4_stage1_feat se descarta.
+- **Coste.** 31 min con 3 hilos: 8 min el dos etapas y 22 min la variante anidada.

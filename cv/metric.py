@@ -81,20 +81,21 @@ def _check(df, what):
     assert df.score.notna().all(), f"{what}: score con NaN"
 
 
-def save_outputs(name, oof=None, preds=None):
-    """Guarda oof/<name>.csv, preds/<name>.csv y submissions/sub_<name>.csv en el formato común."""
+def save_outputs(name, oof=None, preds=None, out=ROOT):
+    """Guarda oof/<name>.csv, preds/<name>.csv y submissions/sub_<name>.csv en el formato común (dentro de out;
+    futuro/ usa out=ROOT / "futuro" para que el stacking de main no coja esos modelos)."""
     if oof is not None:
         _check(oof, "oof")
-        (ROOT / "oof").mkdir(exist_ok=True)
-        oof[["sample_id", "row_index", "score"]].to_csv(ROOT / "oof" / f"{name}.csv", index=False)
+        (out / "oof").mkdir(exist_ok=True, parents=True)
+        oof[["sample_id", "row_index", "score"]].to_csv(out / "oof" / f"{name}.csv", index=False)
     if preds is not None:
         _check(preds, "preds")
         n_test = pd.read_csv(DATA / "test.csv", usecols=["sample_id"]).sample_id.nunique()
         assert preds.sample_id.nunique() == n_test, f"preds: {preds.sample_id.nunique()} muestras, test tiene {n_test}"
         for sub in ("preds", "submissions"):
-            (ROOT / sub).mkdir(exist_ok=True)
-        preds[["sample_id", "row_index", "score"]].to_csv(ROOT / "preds" / f"{name}.csv", index=False)
-        to_submission(preds).to_csv(ROOT / "submissions" / f"sub_{name}.csv", index=False)
+            (out / sub).mkdir(exist_ok=True, parents=True)
+        preds[["sample_id", "row_index", "score"]].to_csv(out / "preds" / f"{name}.csv", index=False)
+        to_submission(preds).to_csv(out / "submissions" / f"sub_{name}.csv", index=False)
     print("Guardado:", name, "(oof)" if oof is not None else "", "(preds + sub)" if preds is not None else "")
 
 
