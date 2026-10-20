@@ -53,3 +53,8 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 00:55,b12c/l63_mc100_et,alerta+contexto,"{'num_leaves': 63, 'min_child_samples': 100, 'extra_trees': True}",99,0.6559,,2 semillas. peor_atco 0.565. sin 0 snapshots al entrenar. idea Juanma 13a: 63 hojas + extra_trees
 00:56,b12c/peso_tramo,alerta+contexto,{},99,0.6631,,2 semillas. peor_atco 0.576. sin 0 snapshots al entrenar. peso tramo^0.5. idea Pablo 11e: 1/sqrt(longitud del tramo)
 01:08,lgb_adri_v2,alerta+contexto,{},99,0.6644,,10 semillas. peor_atco 0.579. sin 0 snapshots al entrenar. peso tramo^0.5. versión para el stacking
+01:28,b13/tramo_p0.25,alerta+contexto,{},99,0.6566,,2 semillas. peor_atco 0.578. sin 0 snapshots al entrenar. peso tramo^0.25. peso 1/tramo^0.25
+01:29,b13/tramo_p0.75,alerta+contexto,{},99,0.6584,,2 semillas. peor_atco 0.575. sin 0 snapshots al entrenar. peso tramo^0.75. peso 1/tramo^0.75
+01:30,b13/tramo_p1.0,alerta+contexto,{},99,0.6565,,2 semillas. peor_atco 0.582. sin 0 snapshots al entrenar. peso tramo^1.0. peso 1/tramo
+01:31,b13/racha_p0.5,alerta+contexto,{},99,0.6622,,"2 semillas. peor_atco 0.576. sin 0 snapshots al entrenar. peso tramo^0.5. peso 1/racha^0.5, sin etiqueta"
+01:32,b13/logic_tramo_p0.5,alerta+contexto,{},113,0.6619,,2 semillas. peor_atco 0.593. sin 0 snapshots al entrenar. peso tramo^0.5. +logic con peso 1/tramo^0.5
