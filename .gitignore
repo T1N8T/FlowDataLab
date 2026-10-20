@@ -4,10 +4,13 @@
 # ---------------------------------------------------------------
 Data/*.csv
 !Data/sample_submission.csv
+!Data/folds.csv
 
 # Salidas generadas
 submissions/*
 !submissions/.gitkeep
+oof/
+preds/
 models/*
 !models/.gitkeep
 *.pkl
