@@ -1,13 +1,19 @@
 """
-Modelo analítico: logit condicional (elección discreta, McFadden).
+m_clogit.py · Juanma (C) · Modelo analítico: logit condicional (elección discreta, McFadden).
 El controlador elige la tarea i del snapshot con P(i) = softmax_i(u_i), con utilidad lineal e interpretable:
     u_i = prior[tipo] + urgencia[tipo, tramo de deadline] + reglas lógicas (+ señales futuras)
-    python src/choice_model.py   -> CV por controlador, coeficientes en models/choice_coefs_*.csv,
-                                    utilidades OOF/test en models/choice_util_*.npy (para apilar en LightGBM)
+
+- Sin --future (regla 1): solo features del propio snapshot (base + logic_*).
+  Salidas en formato común: oof/clogit.csv, preds/clogit.csv, submissions/sub_clogit.csv.
+- Con --future: añade señales de snapshots posteriores (f_*). NO PERMITIDO para enviar; solo referencia.
+  Se guarda aparte, en models/future/ (fuera de oof/ para que el stacking no lo coja).
+- CV con Data/folds.csv (columna fold de features.parquet). Coeficientes en models/<nofuture|future>/choice_coefs.csv.
+Uso:  python src/m_clogit.py [--future]
 """
-import numpy as np, pandas as pd, torch
-from features import MODELS, TYPES
-from train import load_feats, hit3, smooth, softmax_by_sample
+import sys, numpy as np, pandas as pd, torch
+from features import ROOT, MODELS, TYPES, load_feats
+sys.path.insert(0, str(ROOT / "cv"))
+from metric import report, save_outputs
 
 DL_EDGES = [-np.inf, -600, -300, -120, -60, 0, 60, 120, 240, 480, 900, np.inf]
 NI_EDGES = [0, 5, 10, 20, 40, 80, 160, np.inf]
@@ -67,7 +73,8 @@ def fit_clogit(X, sid, y, l2=1e-3, iters=200):
     return w.detach().numpy()
 
 
-def run(d, future, tag):
+def run(d, future):
+    name = "clogit_future" if future else "clogit"
     lab, te = d[d.split != "test"].reset_index(drop=True), d[d.split == "test"].reset_index(drop=True)
     X, Xte = design(lab, future), design(te, future)
     oof = np.zeros(len(lab))
@@ -76,16 +83,20 @@ def run(d, future, tag):
         w = fit_clogit(X[tr], lab.sample_id.values[tr], lab.target_index.values[tr])
         oof[va] = X[va].values @ w
     w = fit_clogit(X, lab.sample_id.values, lab.target_index.values)
-    ps = smooth(lab, softmax_by_sample(lab, oof))
-    print(f"clogit {tag:14s} top3={hit3(lab, oof):.4f}  +suavizado={hit3(lab, ps):.4f}  ({X.shape[1]} coeficientes)", flush=True)
-    pd.Series(w, index=X.columns).to_csv(MODELS / f"choice_coefs_{tag}.csv", header=["coef"])
-    np.save(MODELS / f"choice_util_{tag}_oof.npy", oof)
-    np.save(MODELS / f"choice_util_{tag}_test.npy", Xte.values @ w)
+    tst = Xte.values @ w
+    o = pd.DataFrame({"sample_id": lab.sample_id, "row_index": lab.row_index, "score": oof})
+    p = pd.DataFrame({"sample_id": te.sample_id, "row_index": te.row_index, "score": tst})
+    cv = report(o, f"{name} ({X.shape[1]} coef.)")
+    out = MODELS / ("future" if future else "nofuture")
+    out.mkdir(parents=True, exist_ok=True)
+    pd.Series(w, index=X.columns).to_csv(out / "choice_coefs.csv", header=["coef"])
+    np.save(out / "choice_oof.npy", oof); np.save(out / "choice_test.npy", tst)   # mismo orden: sample_id, row_index
+    if not future:
+        save_outputs(name, o, p)
+    print(f"{name}: CV top3 = {cv:.4f}")
     return oof, w
 
 
 if __name__ == "__main__":
     torch.set_num_threads(12)
-    d = load_feats()
-    run(d, future=False, tag="logic")
-    run(d, future=True, tag="logic_future")
+    run(load_feats(), future="--future" in sys.argv)

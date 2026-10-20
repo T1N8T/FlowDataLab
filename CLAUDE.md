@@ -63,7 +63,8 @@ Cada persona trabaja en su rama de git. Los CSV grandes se comparten por carpeta
 - Usando snapshots futuros (siguiente input del controlador sobre el avión, a partir de `a_since_flight`): 0.83. **No permitido por ahora.**
 
 ## Ojo
-- `src/baseline_ranker.py` usa la feature futura `f_next_input`: no usarlo tal cual.
+- `src/baseline_ranker.py` y `src/train.py` (LightGBM con features futuras) se han eliminado; LightGBM es de Adri.
+- `src/m_clogit.py` (Juanma): sin `--future` cumple la regla 1 y guarda en `oof/` y `preds/`; con `--future` solo es referencia y va a `models/future/`.
 - **No subir** `submissions/sub_lgb_temporal.csv`.
 - Las etiquetas tienen ruido y los controladores no coinciden mucho entre sí: el techo está bastante por debajo de 1. Preferir modelos robustos a los sobreajustados.
 

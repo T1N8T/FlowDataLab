@@ -45,7 +45,7 @@ Todos pueden usar las máquinas del DSIC-UPV para lanzar lo pesado: bluenote.dsi
 4. **Columnas que no son features:** `sample_id`, `target_index`, `session`, `atco`, `scenario`, `timestamp`, `task_name`. `row_index` solo si el EDA demuestra que aporta.
 5. Se entrena con `train.csv` + `validation.csv` juntos.
 6. **Nadie sube a Kaggle salvo Juanma.**
-7. No usar `src/baseline_ranker.py` (usa una feature futura) ni subir `submissions/sub_lgb_temporal.csv`.
+7. No subir `submissions/sub_lgb_temporal.csv` (usa features futuras). Lo que va a `models/future/` es solo referencia.
 
 ### Formato común de salidas (para poder combinar modelos)
 Cada modelo genera tres archivos:
