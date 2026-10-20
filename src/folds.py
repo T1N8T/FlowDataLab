@@ -6,7 +6,7 @@ folds.py · común · Genera Data/folds.csv (columnas atco,fold) para GroupKFold
   muestras hasta el momento. No depende de semillas: todos obtienen el mismo archivo.
 Uso:  python src/folds.py
 """
-import pandas as pd
+import hashlib, pandas as pd
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parents[1] / "Data"
@@ -23,7 +23,10 @@ def make_folds():
         f = min(range(N_FOLDS), key=lambda i: (load[i], i))
         fold[atco] = f; load[f] += k
     out = pd.DataFrame({"atco": list(fold), "fold": list(fold.values())}).sort_values("atco")
-    out.to_csv(DATA / "folds.csv", index=False)
+    out.to_csv(DATA / "folds.csv", index=False, lineterminator="\n")   # LF también en Windows
+    for f in ("train.csv", "validation.csv", "folds.csv"):              # huella para comparar entre máquinas
+        print(f"md5 {f:15s} {hashlib.md5((DATA / f).read_bytes()).hexdigest()}")
+    print(f"{len(d)} muestras, {d.atco.nunique()} controladores")
     summary = d.assign(fold=d.atco.map(fold)).groupby("fold").agg(muestras=("sample_id", "size"),
                                                                   atcos=("atco", lambda s: sorted(s.unique())))
     print(summary.to_string())
