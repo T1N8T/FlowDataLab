@@ -2,21 +2,27 @@
 m_nn_future.py · Pablo (A) · RAMA "futuro" · Transformer de snapshot + información de otros snapshots de la sesión.
 
 !! ROMPE LA REGLA 1 DEL EQUIPO A PROPÓSITO: usa snapshots anteriores y posteriores de la misma sesión. !!
-Vive solo en la rama `futuro`; sus oof/ y preds/ no deben llegar a `main` (stack.py coge todo lo que hay en oof/).
+Vive en futuro/ y guarda en futuro/oof|preds|submissions: stacking/stack.py solo lo coge con --futuro.
 
 Es la misma red que nn_tf_v2 (src/m_nn.py, ls=0, layers=4, lr=5e-4) con más columnas por tarea, sacadas de
-src/features_future.py (no usan etiquetas, solo la propia sesión):
+futuro/features_future.py (no usan etiquetas, solo la propia sesión):
 - f_* (futuro): segundos hasta la siguiente instrucción al avión y su tipo, si encaja con el tipo de tarea, cuándo
   desaparece la tarea / el avión de la lista, si sigue en el siguiente snapshot.
 - p_* (pasado) y blk_*/gap_*: cuánto lleva la tarea en la lista, cambios respecto al snapshot anterior, posición en la
   racha de snapshots contiguos.
 Los folds siguen siendo Data/folds.csv (por controlador), así que la CV es comparable con el resto.
 
-Uso:  python src/m_nn_future.py                    # 3 semillas, guarda oof/preds/submissions de nn_future
-      python src/m_nn_future.py --quick --folds 0  # prueba rápida
+Uso:  python futuro/m_nn_future.py                    # 3 semillas, guarda oof/preds/submissions de nn_future
+      python futuro/m_nn_future.py --quick --folds 0  # prueba rápida
 """
 import sys
-import m_nn, features_future as features   # versión con pasado/futuro (rama futuro)
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+import m_nn, features_future as features   # versión con pasado/futuro
+
+m_nn.ROOT = ROOT / "futuro"                 # salidas en futuro/oof|preds|submissions (DATA y EXP no cambian)
 
 TEMPORAL_EXTRA = ["blk_pos", "blk_len", "gap_prev", "gap_next"]
 _load_base = m_nn.load

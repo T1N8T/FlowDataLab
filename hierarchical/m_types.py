@@ -11,6 +11,7 @@ m_types.py · Juanma (C) · Especialistas por tipo: score(tarea) = P(tipo | snap
 
 Uso:  python hierarchical/m_types.py            # CV + salidas oof/types.csv, preds/types.csv, submissions/sub_types.csv
       python hierarchical/m_types.py --quick    # solo CV, sin entrenar para test ni guardar
+      python hierarchical/m_types.py --future   # + columnas de otros snapshots (rompe la regla 1) -> futuro/oof/types_future.csv
 """
 import sys, time, numpy as np, pandas as pd, lightgbm as lgb
 from pathlib import Path
@@ -77,7 +78,10 @@ def snapshot_feats(d):
         offered=("assume_offered", "sum"), due=("transfer_due", "sum"), last_cs=("a_is_last_cs", "max"),
         last2_cs=("a_is_last2_cs", "max"), assumed=("is_assumed", "sum"), zone_min=("distance_to_zone", "min"),
         md_min=("time_to_MD", "min"), conflict=("conflict_ind", "sum"), stca=("HMI_conflict_safety_alert", "sum"),
-        twin=("l_twin_AE", "sum"))
+        twin=("l_twin_AE", "sum"),
+        **({} if "f_next_input" not in d else dict(                  # --future: agregados temporales por tipo
+            next_min=("f_next_input", "min"), match_soon=("f_next_match_soon", "max"), end_min=("f_task_end", "min"),
+            gone=("f_gone_next", "max"), start_min=("p_task_start", "min"))))
     S = agg.unstack("task_index")
     S.columns = [f"s_{a}_{t}" for a, t in S.columns]
     S = S.reindex(columns=[f"s_{a}_{t}" for a in agg.columns for t in range(N_TYPES)])
@@ -134,7 +138,14 @@ def fit_predict(d, S, meta, present, F, tr_mask_s, te_mask_s, seed=0):
 
 def main():
     quick = "--quick" in sys.argv
-    d = add_row_feats(load())
+    future = "--future" in sys.argv
+    name = NAME + ("_future" if future else "")
+    d = load()
+    if future:
+        sys.path.insert(0, str(ROOT / "futuro"))
+        from temporal import add_temporal
+        d = add_temporal(d)
+    d = add_row_feats(d)
     S, meta, present = snapshot_feats(d)
     F = [c for c in d.columns if c not in NOT_FEATS]
     print(f"{len(F)} features por fila, {S.shape[1]} por snapshot", flush=True)
@@ -152,7 +163,7 @@ def main():
 
     lab = d[d.split != "test"]
     o = pd.DataFrame({"sample_id": lab.sample_id, "row_index": lab.row_index, "score": oof[lab.index]})
-    cv = report(o, NAME)
+    cv = report(o, name)
     # diagnóstico: techo si el tipo fuera perfecto vs. si la tarea dentro del tipo fuera perfecta
     t = lab.assign(pt=oof_type[lab.index])
     y = t[t.target_index == 1].set_index("sample_id")
@@ -168,8 +179,8 @@ def main():
     sc, _, rows = fit_predict(d, S, meta, present, F, lab_s, te_s)
     te = d[rows]
     p = pd.DataFrame({"sample_id": te.sample_id.values, "row_index": te.row_index.values, "score": sc})
-    save_outputs(NAME, o, p)
-    print(f"{NAME}: CV top3 = {cv:.4f}")
+    save_outputs(name, o, p, out=ROOT / "futuro" if future else ROOT)
+    print(f"{name}: CV top3 = {cv:.4f}")
 
 
 if __name__ == "__main__":

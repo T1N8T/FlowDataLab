@@ -1,24 +1,25 @@
 """
 m_lgb_future.py · Pablo (A) · RAMA "futuro" · LightGBM LambdaRank con información de otros snapshots de la sesión.
 
-!! ROMPE LA REGLA 1 DEL EQUIPO A PROPÓSITO. Vive solo en la rama `futuro`; sus oof/ y preds/ no deben llegar a `main`. !!
+!! ROMPE LA REGLA 1 DEL EQUIPO A PROPÓSITO. Vive en futuro/ y guarda en futuro/oof|preds|submissions (fuera del stacking de main). !!
 
-- Features por bloques (src/features_future.py, ninguna usa la etiqueta):
+- Features por bloques (futuro/features_future.py, ninguna usa la etiqueta):
     base   = columnas originales            logic  = reglas dentro del snapshot (logic_*)
     past   = p_*, blk_*, gap_*              future = f_* (siguiente instrucción, desaparición de la tarea...)
 - Parámetros base de EQUIPO.md (modelo de referencia), task_index categórica. Media de varias semillas.
 - CV con Data/folds.csv; test entrenado con train+validation. Salidas con cv/metric.save_outputs (formato común).
-- Cada ejecución se apunta en experiments/lgb_future_runs.csv. Notebook: notebooks/LGB_futuro_pablo.ipynb.
+- Cada ejecución se apunta en experiments/lgb_future_runs.csv. Notebook: futuro/LGB_futuro_pablo.ipynb.
 
 Uso:
-    python src/m_lgb_future.py                                   # 3 semillas, guarda oof/preds/submissions
-    python src/m_lgb_future.py --quick --leaves 63               # prueba rápida (1 semilla, no guarda)
-    python src/m_lgb_future.py --quick --feats base,logic,past   # quitar un bloque de features
+    python futuro/m_lgb_future.py                                   # 3 semillas, guarda oof/preds/submissions
+    python futuro/m_lgb_future.py --quick --leaves 63               # prueba rápida (1 semilla, no guarda)
+    python futuro/m_lgb_future.py --quick --feats base,logic,past   # quitar un bloque de features
 """
 import sys, time, argparse, numpy as np, pandas as pd, lightgbm as lgb
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+FUT = ROOT / "futuro"
 sys.path.insert(0, str(ROOT / "cv"))
 import features_future as ff
 from metric import report, save_outputs, hits, labels
@@ -104,7 +105,7 @@ def run(a, data):
     saved = not (a.quick or a.folds)
     if saved:
         pred = np.mean([fit(a, lab, F, s).predict(te[F]) for s in range(a.seeds)], axis=0)
-        save_outputs(a.name, oof_df, te[["sample_id", "row_index"]].assign(score=pred))
+        save_outputs(a.name, oof_df, te[["sample_id", "row_index"]].assign(score=pred), out=FUT)
     log_run(a, cv, fold_cv, min_atco, len(F), time.time() - t0, saved)
     return cv
 

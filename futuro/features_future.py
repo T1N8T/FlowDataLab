@@ -1,7 +1,7 @@
 """
 features_future.py · RAMA "futuro" · Features que usan OTROS snapshots de la sesión (rompen la regla 1 a propósito).
 Es la versión antigua de src/features.py (antes de la limpieza del equipo), con los folds de Data/folds.csv.
-La usan src/m_nn_future.py y src/m_lgb_future.py. No llevar a main.
+La usan futuro/m_nn_future.py, futuro/m_lgb_future.py y futuro/temporal.py. No usar en los modelos de main.
 
 Bloques de features:
 - base: columnas originales
