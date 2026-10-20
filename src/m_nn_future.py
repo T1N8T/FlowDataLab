@@ -46,3 +46,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def build_data_future():
+    """Para el notebook: como m_nn.build_data() pero con las columnas temporales (no toca la red limpia)."""
+    m_nn.load = load_future
+    try:
+        return m_nn.build_data()
+    finally:
+        m_nn.load = _load_base
