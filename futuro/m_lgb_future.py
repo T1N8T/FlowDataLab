@@ -56,6 +56,7 @@ def parse(argv=None):
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--oraculo", action="store_true", help="añade el oráculo or_* (feat_oracle.py), calculado por fold")
     ap.add_argument("--oraculo-var", default="base", help="variante del oráculo: base, B, C, D, E (feat_oracle.py)")
+    ap.add_argument("--oraculo-temp", type=float, default=0.0, help="oráculo ponderado por estilo: temperatura (0 = uniforme)")
     ap.add_argument("--test-folds", action="store_true", help="test = media de los modelos de cada fold (no reentrena)")
     ap.add_argument("--sesion", action="store_true", help="segundo paso de sesión (feat_session.py) -> <name>_ses")
     ap.add_argument("--ref", default="lgb_future_clear",
@@ -80,18 +81,19 @@ def build_data():
     return dict(lab=lab, te=te, fs=fs)
 
 
-def oracle_data(data, variant="base"):
+def oracle_data(data, variant="base", temp=0.0):
     """Oráculo (usa etiquetas de otras sesiones), calculado una vez: una versión por fold de CV y otra para el modelo
     final / test. Se guarda en data["orac"]."""
-    key = "orac_" + variant
+    key = f"orac_{variant}_{temp}"
     if key not in data:
         t0 = time.time()
         lab, te = data["lab"], data["te"]
         D = pd.concat([lab, te], ignore_index=True)
         mats = feat_oracle.matrices(D, feat_oracle.align(D), extra=variant != "base")
         n = len(lab)
-        full = feat_oracle.feats(D, mats, None, variant)
-        data[key] = {f: feat_oracle.feats(D, mats, f, variant).iloc[:n] for f in sorted(lab.fold.unique())}
+        kw = dict(temp=temp, Z=feat_oracle.estilo(D)) if temp else {}
+        full = feat_oracle.feats(D, mats, None, variant, **kw)
+        data[key] = {f: feat_oracle.feats(D, mats, f, variant, **kw).iloc[:n] for f in sorted(lab.fold.unique())}
         data[key].update(lab=full.iloc[:n], te=full.iloc[n:].reset_index(drop=True))
         print(f"oráculo {variant} calculado ({time.time() - t0:.0f}s)", flush=True)
     return data[key]
@@ -144,7 +146,7 @@ def run(a, data):
           flush=True)
     lab, te, fs = data["lab"], data["te"], data["fs"]
     F = [c for b in a.feats.split(",") for c in fs[b]]
-    O = oracle_data(data, a.oraculo_var) if a.oraculo else None
+    O = oracle_data(data, a.oraculo_var, a.oraculo_temp) if a.oraculo else None
     if a.oraculo:
         F = F + list(O["lab"].columns)
         te = pd.concat([te, O["te"]], axis=1)

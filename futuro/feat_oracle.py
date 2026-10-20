@@ -12,6 +12,9 @@ Variantes (feats(..., variant=)): "base" (lo de arriba), "B" + ventanas ±30/300
 exp(-|Δt|/120) a la respuesta más cercana; "C" + ventanas ±60/180 s en tiempo relativo a la primera aparición del
 avión en la sesión (or_a*); "D" solo or_near180, or_dt, or_ever; "E" = B + C; "coord" = base, pero solo en
 entry/exit_coordination (vacío en el resto de tipos).
+Ponderado (temp=T, sección 17): en vez de promediar las sesiones fuente por igual, cada una pesa exp(−d/T), con d la
+distancia entre perfiles de estilo observables SIN etiquetas (estilo()): las referencias de estilo parecido coinciden
+más en sus respuestas (Spearman −0.20 entre distancia de estilo y acuerdo, 424 parejas).
 USA ETIQUETAS de otras sesiones -> se calcula por fold con feats(d, mats, fold_out): solo cuentan sesiones etiquetadas
 del mismo escenario, de folds != fold_out y de otro controlador que la fila. fold_out=None (modelo final y test):
 todas las sesiones etiquetadas salvo las del propio controlador.
@@ -31,6 +34,22 @@ def align(d):
     first["ref"] = first.groupby(["scenario", "cs"]).rel.transform("median")
     corr = (first.rel - first.ref).groupby(first.session).median()
     return (d.t - t0 - d.session.map(corr)).values
+
+
+def estilo(d):
+    """Perfil de estilo por sesión (z-score), solo con columnas observables: cuándo asume / transfiere respecto al borde,
+    ritmo de instrucciones y mezcla de tipos de instrucción. No usa etiquetas."""
+    s = d.drop_duplicates(["session", "cs", "t"])
+    ass = s[s.is_assumed == 1].sort_values("t").drop_duplicates(["session", "cs"])
+    p = pd.DataFrame({
+        "tts_al_asumir": ass.groupby("session").time_to_sector.median(),
+        "tts_transfer": s[s.a_last_initiate_transfer_of_control == 1].groupby("session").time_to_sector.median(),
+        "ritmo_n60": s.drop_duplicates(["session", "t"]).groupby("session").a_n60.median(),
+        "frac_nivel": s.groupby("session").a_last_assign_level_clearance.mean(),
+        "frac_lateral": s.groupby("session").a_last_assign_lateral_clearance.mean(),
+        "frac_heading": s.groupby("session").k_isClearedHeadingAssigned.mean(),
+        "frac_forzado": s.groupby("session").a_last_force_assume_control.mean()})
+    return (p - p.mean()) / p.std()
 
 
 def keys_near(names, tb_src, W):
@@ -82,12 +101,13 @@ def matrices(d, tau, extra=False):
                     v = m2.groupby("i").dd.min()
                     mind[v.index.values, j] = v.values
         info = lab[lab.scenario == sc].drop_duplicates("session").set_index("session").loc[src]
-        out[sc] = dict(idx=idx, M=M, dt=dt, mind=mind, fold=info.fold.values, atco=info.atco.values)
+        out[sc] = dict(idx=idx, M=M, dt=dt, mind=mind, fold=info.fold.values, atco=info.atco.values, src=src)
     return out
 
 
-def feats(d, mats, fold_out, variant="base"):
-    """Features or_* con las fuentes permitidas: folds != fold_out (None = todas) y atco distinto de la fila."""
+def feats(d, mats, fold_out, variant="base", temp=None, Z=None):
+    """Features or_* con las fuentes permitidas: folds != fold_out (None = todas) y atco distinto de la fila.
+    temp: pondera cada fuente con exp(-distancia de estilo / temp) (Z = estilo(d)); None = todas igual."""
     n = len(d)
     frac = {"or_ever": "ever", "or_near60": "near60", "or_near180": "near180"}
     if variant in ("B", "E"):
@@ -101,6 +121,11 @@ def feats(d, mats, fold_out, variant="base"):
         if fold_out is not None:
             ok &= (m["fold"] != fold_out)[None, :]
         ok &= d.atco.values[idx][:, None] != m["atco"][None, :]
+        if temp is not None:
+            ses = d.session.values[idx]
+            us = pd.unique(ses)
+            D = np.sqrt(((Z.loc[us].values[:, None, :] - Z.loc[m["src"]].values[None, :, :]) ** 2).sum(-1))
+            ok = ok * np.exp(-D / temp)[pd.Index(us).get_indexer(ses)]
         has = (m["M"]["has"] * ok).sum(1)
         nsrc = ok.sum(1)
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -122,6 +147,6 @@ def feats(d, mats, fold_out, variant="base"):
     if variant in ("base", "coord"):
         rk = ["or_ever", "or_near60", "or_near180", "or_cs_near60"]
     for c in rk:
-        o[c + "_rk"] = o[c].groupby(d.sample_id).rank(ascending=False, method="min")
+        o[c + "_rk"] = o[c].round(6).groupby(d.sample_id).rank(ascending=False, method="min")   # sin empates rotos por 1e-9
     o["or_dt_abs"] = o.or_dt.abs()
     return o
