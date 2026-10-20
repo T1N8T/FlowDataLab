@@ -1,6 +1,10 @@
 numpy
 pandas
+scipy
 scikit-learn
 lightgbm
 matplotlib
+seaborn
 jupyter
+# CPU: pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch
