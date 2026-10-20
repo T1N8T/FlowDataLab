@@ -12,7 +12,7 @@ m_types.py · Juanma (C) · Especialistas por tipo: score(tarea) = P(tipo | snap
 Uso:  python hierarchical/m_types.py            # CV + salidas oof/types.csv, preds/types.csv, submissions/sub_types.csv
       python hierarchical/m_types.py --quick    # solo CV, sin entrenar para test ni guardar
 """
-import sys, numpy as np, pandas as pd, lightgbm as lgb
+import sys, time, numpy as np, pandas as pd, lightgbm as lgb
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +22,7 @@ from metric import report, save_outputs
 DATA = ROOT / "Data"
 NAME = "types"
 N_TYPES = 14
+N_JOBS = 6          # no usar todos los núcleos: con otros procesos en marcha LightGBM se hunde
 NOT_FEATS = ["sample_id", "target_index", "session", "atco", "scenario", "timestamp", "task_name", "row_index",
              "split", "fold", "cs"]
 # columnas que se rankean dentro del (snapshot, tipo): menor valor = rank 1
@@ -99,23 +100,25 @@ def snapshot_feats(d):
 def type_model(seed=0):
     return lgb.LGBMClassifier(objective="multiclass", num_class=N_TYPES, n_estimators=300, learning_rate=0.04,
                               num_leaves=15, min_child_samples=30, subsample=0.8, subsample_freq=1,
-                              colsample_bytree=0.6, reg_lambda=2.0, random_state=seed, verbose=-1, n_jobs=12)
+                              colsample_bytree=0.6, reg_lambda=2.0, random_state=seed, verbose=-1, n_jobs=N_JOBS)
 
 
 def task_model(seed=0):
     return lgb.LGBMClassifier(objective="binary", n_estimators=400, learning_rate=0.04, num_leaves=31,
                               min_child_samples=50, subsample=0.8, subsample_freq=1, colsample_bytree=0.6,
-                              reg_lambda=1.0, random_state=seed, verbose=-1, n_jobs=12)
+                              reg_lambda=1.0, random_state=seed, verbose=-1, n_jobs=N_JOBS)
 
 
 def fit_predict(d, S, meta, present, F, tr_mask_s, te_mask_s, seed=0):
     """Entrena con los snapshots tr_mask_s y devuelve (score por fila, P(tipo) por fila) para los te_mask_s."""
+    t0 = time.time()
     # etapa 1: P(tipo)
     m1 = type_model(seed).fit(S[tr_mask_s], meta.y[tr_mask_s])
     P = np.zeros((te_mask_s.sum(), N_TYPES), np.float32)
     P[:, m1.classes_] = m1.predict_proba(S[te_mask_s])
     P = P * present[te_mask_s]
     P /= P.sum(1, keepdims=True)
+    t1 = time.time()
     # etapa 2: P(tarea | tipo) entre las tareas del tipo correcto
     sid_tr = set(meta.index[tr_mask_s])
     row_tr = d.sample_id.isin(sid_tr).values & (d.task_index.values == d.sample_id.map(meta.y).values)
@@ -125,6 +128,7 @@ def fit_predict(d, S, meta, present, F, tr_mask_s, te_mask_s, seed=0):
     q = q / q.groupby([d.sample_id[row_te], d.task_index[row_te]]).transform("sum")
     pt = pd.DataFrame(P, index=meta.index[te_mask_s])
     p_type = pt.values[pt.index.get_indexer(d.sample_id[row_te]), d.task_index[row_te].values]
+    print(f"  etapa1 {t1 - t0:.0f}s  etapa2 {time.time() - t1:.0f}s ({row_tr.sum()} filas)", flush=True)
     return q.values * p_type, p_type, row_te
 
 

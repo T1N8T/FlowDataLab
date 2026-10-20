@@ -134,7 +134,7 @@ def stack_avg(lab, te, models, kind):
 def meta_model(seed=0):
     return lgb.LGBMRanker(objective="lambdarank", n_estimators=200, learning_rate=0.03, num_leaves=7,
                           min_child_samples=200, subsample=0.8, subsample_freq=1, colsample_bytree=0.8,
-                          reg_lambda=5.0, lambdarank_truncation_level=5, random_state=seed, verbose=-1, n_jobs=8)
+                          reg_lambda=5.0, lambdarank_truncation_level=5, random_state=seed, verbose=-1, n_jobs=6)
 
 
 def meta_fit(A, F, seed=0):
