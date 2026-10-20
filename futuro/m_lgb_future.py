@@ -52,12 +52,15 @@ def parse(argv=None):
     ap.add_argument("--quick", action="store_true", help="1 semilla y sin guardar oof/preds/submission")
     ap.add_argument("--peso", default="", help="peso por snapshot en el 1.er pase: racha o tramo (1/longitud^peso-pot)")
     ap.add_argument("--peso-pot", type=float, default=0.5)
+    ap.add_argument("--peso-coord", type=float, default=1.0, help="peso de los snapshots cuya respuesta es una coordinación")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--oraculo", action="store_true", help="añade el oráculo or_* (feat_oracle.py), calculado por fold")
     ap.add_argument("--oraculo-var", default="base", help="variante del oráculo: base, B, C, D, E (feat_oracle.py)")
     ap.add_argument("--test-folds", action="store_true", help="test = media de los modelos de cada fold (no reentrena)")
     ap.add_argument("--sesion", action="store_true", help="segundo paso de sesión (feat_session.py) -> <name>_ses")
-    ap.add_argument("--ref", default="lgb_future_clear_ses", help="OOF de referencia (futuro/oof) para las métricas por sesión/controlador")
+    ap.add_argument("--ref", default="lgb_future_clear",
+                    help="referencia (futuro/oof) para las métricas por sesión/controlador: el 1.er pase se compara con <ref> "
+                         "y el segundo paso con <ref>_ses")
     ap.add_argument("--tag", default="", help="nota libre para el registro de experimentos")
     a = ap.parse_args(argv)
     if a.quick: a.seeds = 1
@@ -104,17 +107,21 @@ def model(a, seed):
 
 def fit(a, A, F, seed):
     w = None if not a.peso else 1.0 / A["n_" + a.peso].values ** a.peso_pot
+    if a.peso_coord != 1.0:
+        w = (1.0 if w is None else w) * np.where(A.coord_grp.values, a.peso_coord, 1.0)
     return model(a, seed).fit(A[F], A.target_index, group=A.groupby("sample_id", sort=False).size().values,
                               sample_weight=w, categorical_feature=["task_index"])
 
 
 def add_lengths(lab):
-    """n_racha = snapshots de la racha; n_tramo = snapshots del tramo (racha + misma respuesta seguida). Solo para pesos."""
+    """n_racha = snapshots de la racha; n_tramo = snapshots del tramo (racha + misma respuesta seguida); coord_grp = la
+    respuesta del snapshot es una coordinación. Solo para pesos (usan la etiqueta de las filas de entrenamiento)."""
     y = lab[lab.target_index == 1].sort_values(["session", "t"])
     seg = ((y.task_name != y.groupby("session").task_name.shift()) | (y.blk_pos == 0)).cumsum()
     n = seg.map(seg.value_counts())
     lab["n_racha"] = lab.blk_len
     lab["n_tramo"] = lab.sample_id.map(dict(zip(y.sample_id, n)))
+    lab["coord_grp"] = lab.sample_id.map(dict(zip(y.sample_id, y.task_index.isin([2, 3]))))
     return lab
 
 
@@ -167,7 +174,7 @@ def run(a, data):
         print(f"  pesos del segundo paso: {w}")
         ses = argparse.Namespace(**{**vars(a), "name": a.name + "_ses", "tag": (a.tag + " +sesion").strip()})
         oof_ses = lab[["sample_id", "row_index"]].assign(score=so)
-        ms = evaluate(ses.name, oof_ses, ref, a.ref)
+        ms = evaluate(ses.name, oof_ses, read_ref(a, "_ses"), a.ref + "_ses")
         if saved:
             save_outputs(ses.name, oof_ses, te[["sample_id", "row_index"]].assign(score=sp), out=FUT)
         log_run(ses, ms, len(F), time.time() - t0, saved)
@@ -175,9 +182,10 @@ def run(a, data):
     return m["cv"]
 
 
-def read_ref(a):
-    """OOF de referencia para comparar (None si no existe o si la CV no tiene todos los folds)."""
-    p = FUT / "oof" / f"{a.ref}.csv"
+def read_ref(a, suffix=""):
+    """OOF de referencia para comparar (None si no existe o si la CV no tiene todos los folds). suffix="_ses" para
+    comparar el segundo paso con el segundo paso de la referencia."""
+    p = FUT / "oof" / f"{a.ref}{suffix}.csv"
     return pd.read_csv(p) if a.ref and p.exists() and not a.folds else None
 
 
