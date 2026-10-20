@@ -1,0 +1,70 @@
+Overview
+An en-route air traffic controller looks after a block of airspace and keeps a mental list of jobs: accepting aircraft from the previous sector, keeping aircraft apart, steering them around military zones, handing them over to the next sector. The AWARE research system builds that list automatically from radar, flight plan and coordination data. Every 3 seconds it holds a list of dozens of open tasks.
+
+Your job is to predict which task in the list the controller is working on at that moment. A model that can do this could help a future controller support system decide what to show first.
+
+Goal
+For every sample in the test set, submit the three tasks you think most likely to be the one the controller is working on, best first. You score a point when the true task is among your three.
+
+Start
+
+19 hours ago
+Close
+
+a day to go
+Description
+Where the data comes from
+The data was recorded in simulator exercises at a Swedish upper-airspace sector (ESMM_23). Nineteen controllers each flew up to three traffic scenarios. AWARE ran on the recorded traffic and wrote out its task list every 3 seconds. Experts then marked, from the recordings, which task the controller was working on at each moment.
+
+What a sample looks like
+A sample is one snapshot of the task list during a labelled moment. It is identified by sample_id.
+A row is one task in that list. row_index gives its position (0, 1, 2, …), and seq_len the length of the list.
+The label: exactly one task per sample is the answer. It is marked target_index = 1 in the training and validation files.
+Task names: each task has a type (task_index, 14 types such as assume_aircraft or transfer_aircraft) and belongs to an aircraft (e.g. SAS95T). task_name combines the two, e.g. assume_aircraft_SAS95T.
+Feature columns: 86 columns describe the aircraft's position, status, conflicts, coordination with neighbouring sectors, recent controller inputs, and the task's place in the list. Every column is explained in FEATURES.md.
+Things to know
+Aircraft vs task: most columns describe the aircraft, so they are identical for all tasks of the same aircraft in a sample. Telling an aircraft's tasks apart relies on the task type, the task's age (x_task_age) and the list-context columns (l_). The hardest case is an aircraft with both an assume_aircraft and an entry_coordination task.
+Empty cells: an empty cell means "does not apply" or "not computed"; it is never 0. Many k_ columns are empty for aircraft the controller does not yet control.
+Samples are not independent: snapshots are 3 seconds apart, and consecutive samples of one session usually share the same answer.
+Splitting by session: the split is by whole sessions, so the test controllers and sessions are not in the training data. If you make your own validation split, split by session as well. A random split over samples gives far too optimistic scores.
+Repeated traffic: the three scenarios repeat across sessions with different controllers. A model that memorises one controller's choices for a scenario will not do well.
+Imperfect labels: the labels come from human annotation and contain some noise.
+Human factor: Air traffic controllers have different strategies when solving a traffic situation, so naturally they gave different priorities to different tasks, even in a very similar situation.
+Files
+File	Content	Samples	Rows	Sessions
+train.csv	Training data with target_index	11,923	432,578	34
+validation.csv	Validation data with target_index (sessions 019sc1, 019sc2, 020sc1)	1,252	42,110	3
+test.csv	Test data, without target_index	1,863	66,409	5
+sample_submission.csv	A valid submission for test.csv (simple baseline)	1,863		
+FEATURES.md	Description of every column			
+scorer.py	The scoring script, for checking submissions offline			
+You may train on both train.csv and validation.csv.
+
+Evaluation
+Submissions are scored by the top-3 hit rate. For each test sample, look at the first three distinct task ids in your prediction. The sample scores 1 if the labelled task is one of them, and 0 otherwise. The final score is the mean over all samples, with every sample counting equally:
+
+
+Here N is the number of test samples (1,863), and hit(s) is 1 if the labelled task of sample s is among your first three predicted tasks, otherwise 0.
+
+Leaderboards:
+
+The public leaderboard uses the samples of controller 020 (sessions 020sc2 and 020sc3, 915 samples).
+The private leaderboard, which decides the final ranking, uses controller 023 (sessions 023sc1, 023sc2 and 023sc3, 948 samples).
+Reference scores on the test set:
+
+Method	Top-3 hit rate
+Random choice of three tasks	0.094
+sample_submission.csv: most frequently labelled task types first, then the aircraft closest to the sector boundary	0.352
+To check a submission offline on the validation set: python scorer.py --labelled validation.csv my_validation_submission.csv.
+
+Submission file format
+A CSV file with a header and one line per test sample:
+
+sample_id,prediction
+12797,9 6 41
+12798,9 6 41
+12799,10 7 41
+sample_id: every sample_id of test.csv, once.
+prediction: the row_index values of your chosen tasks, separated by spaces, best first.
+Only the first three distinct ids count. More ids are allowed but ignored, and a repeated id counts once. Fewer than three ids are allowed, but they can only lower your score.
+A missing sample_id, a duplicated sample_id or a non-numeric id makes the submission invalid.

@@ -1,0 +1,282 @@
+Dataset Description
+The dataset comes from en-route air traffic control simulator exercises recorded in September 2025. 19 controllers each worked up to three traffic scenarios in the same sector, 42 sessions in total. The AWARE system computed a list of the controller's open tasks every 3 seconds. Experts marked, from the recordings, which task the controller was working on.
+
+Each labelled moment is one sample, and each task in that moment's list is one row. There are 15,038 samples with 9 to 59 tasks each (36 on average), 541,097 rows in total. The data is split by whole sessions: each session is in exactly one file. The two test controllers (020 and 023) do not appear in train.csv; controller 020 also flew one validation session. No background in air traffic control is needed; the sections below explain every column, and the acronyms are listed at the end.
+
+Files
+train.csv — The training data: 34 sessions, 11,923 samples, 432,578 rows and 96 columns. It contains the label column target_index, which is 1 for the task the controller was working on and 0 for every other task of the sample, so exactly one row per sample_id is 1. Use it to train your model.
+
+validation.csv — Labelled data from three further sessions (019sc1, 019sc2 and 020sc1): 1,252 samples, 42,110 rows, same 96 columns as train.csv. Use it to check your model on sessions it has not seen. You may also merge it with train.csv and split the data your own way, or train your final model on both. If you split, keep whole sessions together: samples of one session are 3 seconds apart and look very similar, so a random split gives misleadingly high scores.
+
+test.csv — The data to predict: 5 sessions of controllers 020 and 023 (020sc2, 020sc3, 023sc1, 023sc2, 023sc3), 1,863 samples, 66,409 rows. It has the same columns as train.csv except target_index, which is hidden. For every sample_id in this file you submit three row_index values. Kaggle scores part of the samples for the public leaderboard and the rest for the private leaderboard, which decides the final ranking.
+
+sample_submission.csv — An example of a valid submission for test.csv: one line per sample with the columns sample_id and prediction, where prediction holds three row_index values separated by spaces, best first. The predictions come from a simple rule: task types that are most often the answer in train.csv come first, and within a type the aircraft closest to the sector boundary. It scores 0.352 on the test set. Use it as a template and as a baseline to beat.
+
+scorer.py — The scoring code that Kaggle uses: the top-3 hit rate, the share of samples where the labelled task is among the first three task ids of the prediction. You can run it on your own validation predictions with python scorer.py --labelled validation.csv my_validation_submission.csv. It also reports what makes a submission invalid: a missing or duplicated sample_id, or an id that is not a number.
+
+Dataset features
+This part explains every column of train.csv, validation.csv and test.csv.
+
+Background in brief
+Air traffic controllers (ATCOs) each look after one block of airspace, called a sector. In this dataset the sector is ESMM_23, part of the Swedish upper airspace. Aircraft enter the sector from a neighbouring sector, cross it and leave it into the next one.
+
+While an aircraft is in or near the sector, the controller has to do things with it. Typical jobs are:
+
+accepting it from the previous sector;
+giving clearances (instructions on level, heading or route);
+keeping it separated from other aircraft;
+handing it over to the next sector. The AWARE system watches the traffic and keeps a list of these jobs, called tasks.
+The recordings come from simulator exercises: 19 controllers each flew up to three traffic scenarios. Experts labelled which task the controller was working on at each moment.
+
+A sample is one such moment: a snapshot of AWARE's task list, taken every 3 seconds, while the controller was working on a labelled task. Each row is one task in that list. The question is which task the controller was working on.
+
+A task belongs to an aircraft. Most columns describe the aircraft, not the task, so they are identical for all tasks of the same aircraft in a sample. Only the task type, the task's age and some list-context columns differ between them.
+
+Empty cells mean "does not apply" or "not computed", never 0. Where a 0 appears, it is a real value.
+
+Units: distances in metres unless stated otherwise (NM = nautical miles, 1 NM = 1,852 m); times in seconds; flight levels in hundreds of feet (FL 350 = 35,000 ft).
+
+Identifiers and label
+sample_id — Identifier of the sample (one snapshot). All rows with the same sample_id belong to one task list, and exactly one of them is the answer.
+
+seq_len — Number of tasks in the sample's list (9 to 59).
+
+row_index — Position of the task in the list, starting at 0. Submissions name tasks by their row_index.
+
+target_index — The label (train and validation only): 1 for the task the controller was working on, 0 for all others. Exactly one row per sample has 1.
+
+task_index — Type of the task, as a code:
+
+Code	Task type	What the controller does
+0	entry_conflict_resolution	Resolve a predicted conflict between two aircraft near the point where they enter the sector
+1	exit_conflict_resolution	Resolve a predicted conflict near the point where they leave the sector
+2	entry_coordination	Agree with the previous sector the conditions (level, time) at which the aircraft will enter
+3	exit_coordination	Agree with the next sector the conditions at which the aircraft will leave
+4	assume_aircraft	Take control of an aircraft offered by the previous sector
+5	transfer_aircraft	Hand the aircraft over to the next sector
+6	conflict_resolution	Resolve a predicted conflict between two aircraft inside the sector
+7	non_conformance_resolution	Deal with an aircraft that is not following its clearance
+8	qos_improvement	Offer the aircraft something better, such as a shorter direct route
+9	entry_conditions	Adjust the conditions at which the aircraft enters (very rare)
+10	exit_conditions	Bring the aircraft to the level agreed for leaving the sector
+11	aircraft_request	Answer a pilot's request (does not occur in this data)
+12	zone_conflict	The aircraft's route crosses an active military zone that it must avoid
+13	return_to_route	The aircraft is off its route and has to be cleared back onto it
+It is a category, not a quantity: code 12 is not "more" than code 4.
+
+session — The exercise run, written as controller and scenario: 004sc2 is controller 004 flying scenario 2. Training, validation and test use different sessions.
+
+atco — Number of the controller (1 to 23, 19 controllers in total).
+
+scenario — The traffic scenario (1, 2 or 3). All sessions of the same scenario have the same traffic, flown by different controllers.
+
+timestamp — Time of the snapshot (HH:MM:SS, UTC, real-world clock; the date is removed). Snapshots are 3 seconds apart. Consecutive samples of one session often share the same answer.
+
+task_name — The task type followed by the aircraft's callsign, e.g. assume_aircraft_SAS95T. Conflict tasks name two aircraft (conflict_resolution_DLH3FR_FIN953); the first one is the aircraft the task is about. A callsign is the aircraft's radio name, usually airline code + flight number.
+
+Aircraft position and status (AWARE task features)
+distance_to_sector — Horizontal distance from the aircraft to the sector boundary, in metres. Positive means outside the sector, and the number is how far it still has to fly to enter. Negative means inside, and the number is the distance to the boundary it will leave by.
+
+time_to_sector — The same distance divided by the aircraft's speed: the time in seconds until the aircraft reaches the boundary. Negative inside the sector. Capped at 3,600 s.
+
+within_sector — 1 if the aircraft is inside the sector horizontally.
+
+approaching_sector — 1 if the aircraft is outside the sector and getting closer to it.
+
+current_FL — The aircraft's current flight level (FL 100 to 400). Aircraft below FL 100, e.g. departures still climbing out, have been removed.
+
+exit_FL — The flight level at which the aircraft is planned to leave the sector. Empty when unknown.
+
+is_assumed — 1 if this controller is in control of the aircraft.
+
+is_not_assumed — 1 if this controller is not (yet) in control of the aircraft, typically because it is still with the previous sector.
+
+is_transferred — 1 if control has already been handed over to the next sector (rare in this data).
+
+Conflicts between aircraft
+conflict_ind — 1 if AWARE predicts a conflict within the next 10 minutes: this aircraft and another one will come closer than the minimum allowed separation.
+
+distance_to_MD — Distance in nautical miles the aircraft will fly along its predicted path until the moment of minimum distance to the other aircraft. Empty when there is no conflict.
+
+time_to_MD — Time in seconds until that moment of minimum distance (0 to 600). Empty when there is no conflict. A value of 0 means the aircraft are at their closest now.
+
+multiple_conflicts_ind — 1 if the aircraft has more than one predicted conflict.
+
+HMI_conflict_safety_alert — 1 if the controller's screen shows a short-term conflict alert (STCA) for this aircraft. That is the ground system's last-minute warning that two aircraft are about to get too close.
+
+CPA_entry_location — 1 if the closest point of approach of the conflict lies where the aircraft enters the sector.
+
+CPA_exit_location — 1 if the closest point of approach lies where the aircraft leaves the sector.
+
+what_if_potential_conflict — 1 if a "what-if" check finds that a planned change, such as a new level, would create a conflict (rare).
+
+Route, clearances and conformance
+qos_candidate — 1 if the aircraft could be offered a better service (QoS), such as a direct route that saves time and fuel.
+
+monitoring_rule_activated — 1 if one of AWARE's conformance checks is active for the aircraft, or it has drifted off its route. Conformance means doing what the clearance says.
+
+non_conformance_FL_delta — How many flight levels the aircraft is away from its cleared level while it is not conforming; 0 otherwise.
+
+non_conformance_heading_delta — How many degrees the aircraft's heading differs from its cleared heading while it is not conforming; 0 otherwise.
+
+non_conformance_agreed_route_deviation_fl — Vertical difference, in flight levels, between the aircraft and the level profile of its agreed route. 0 means on profile.
+
+non_conformance_agreed_route_deviation_horizontally — Sideways distance in metres between the aircraft and its agreed route (cross-track distance). 0 means on the route. A few very large values (over 100 km) may be data errors.
+
+Military zones
+zone_conflict_ind — 1 if the aircraft's route crosses a temporary military zone (TRA) that is currently active. Civil traffic must be kept out of such a zone.
+
+distance_to_zone — Distance in nautical miles to the closest military zone that the route crosses. Empty when the route crosses none.
+
+Hand-over from the previous sector (x_ columns)
+Before an aircraft enters, the previous sector and this sector agree on the entry conditions (coordination). The previous sector then offers the aircraft (transfer), and this controller accepts it (assume).
+
+x_isc_notified — 1 if the coordination with the previous sector is at the "notified" stage: the flight has been announced but the entry conditions are not yet agreed.
+
+x_isc_coordinated — 1 if the entry conditions have been agreed. If both x_isc_ columns are 0, coordination has not started.
+
+x_transfer_in — 1 if the previous sector has offered the aircraft to this controller and is waiting for it to be accepted.
+
+x_request_in — 1 if this controller has asked to take the aircraft early (rare).
+
+x_entry_coord_not_done — 1 if AWARE considers the entry coordination still to be done.
+
+x_in_sector_h — 1 if the aircraft is inside the sector horizontally (AWARE's own test, close to within_sector).
+
+x_state_age — Seconds since the aircraft's control status last changed, for example since it was offered by the previous sector. Capped at 3,600.
+
+x_task_age — Seconds since this task appeared in AWARE's task list. Short interruptions (up to 30 s) are ignored. This is one of the few columns that differ between the tasks of one aircraft.
+
+Aircraft state and exit (k_ columns)
+These values come from AWARE's internal reasoning about each aircraft. Many are only computed for aircraft the controller is in control of; elsewhere they are empty.
+
+k_isClimbing — 1 if the aircraft is climbing.
+
+k_isDescending — 1 if the aircraft is descending.
+
+k_isMaintainingFL — 1 if the aircraft is flying level.
+
+k_isAtCFL — 1 if the aircraft is at its cleared flight level (CFL), the level the controller has told it to fly.
+
+k_isClimbingToCFL — 1 if the aircraft is climbing towards its cleared level.
+
+k_isDescendingToCFL — 1 if the aircraft is descending towards its cleared level.
+
+k_isPassingCFL — 1 if the aircraft is just passing through its cleared level.
+
+k_isFlightLevelBust — 1 if the aircraft has left its cleared level without permission (a "level bust").
+
+k_clearedFL — The cleared flight level.
+
+k_cfl_minus_fl — Cleared level minus current level, in flight levels. Positive means the aircraft still has to climb, negative that it has to descend.
+
+k_clearedFLDelta — Current level minus cleared level (the opposite sign), computed only for aircraft under this controller's control.
+
+k_isClearedFLAssigned — 1 if a cleared level exists for the aircraft.
+
+k_levelClearanceAgeS — Seconds since the last level instruction was given.
+
+k_isClearedHeadingAssigned — 1 if the aircraft has been given a heading, a compass direction to fly instead of following its route.
+
+k_headingClearanceAgeS — Seconds since that heading instruction.
+
+k_isLocked — 1 if the aircraft has a heading or climb/descent rate instruction, so it is not simply following its planned route.
+
+k_groundSpeed — Speed over the ground, in metres per second.
+
+k_trackAgeS — Seconds since the last radar update for the aircraft (almost always 0).
+
+k_inSectorVertically — 1 if the aircraft is within the sector's height band.
+
+k_distanceToExitPoint — Distance in metres to the point where the aircraft is planned to leave the sector.
+
+k_timeToExitPoint — Time in seconds to that exit point.
+
+k_isAtExitFL — 1 if the aircraft is already at the level agreed for leaving the sector.
+
+k_hasToClimbToExitFL — 1 if it still has to climb to reach that exit level.
+
+k_hasToDescendToExitFL — 1 if it still has to descend to reach that exit level.
+
+k_exitConditionsAreMet — 1 if the aircraft will leave the sector as agreed with the next sector.
+
+k_aircraftNeedsToBeTransferred — 1 if the aircraft is under this controller's control, at its exit level and close to the exit, so it is due to be handed over.
+
+k_out_NOTIFIED — 1 if the coordination with the next sector is at the "notified" stage.
+
+k_out_COORDINATED — 1 if the exit conditions have been agreed with the next sector.
+
+k_outCoordMismatch — 1 if the agreed exit level or time no longer matches what the aircraft is cleared to or predicted to do, so the agreement may need to be revised.
+
+k_outCoordRevision — Number of the latest coordination message exchanged with the next sector. Higher means more back-and-forth.
+
+k_coordinationToolActivation — 1 if AWARE would open its coordination tool for the aircraft, e.g. because the exit level or route changed or the aircraft is close to the border.
+
+k_transferToolActivation — 1 if AWARE would open its transfer (hand-over) tool for the aircraft.
+
+Controller inputs recorded by the system (a_ columns)
+Every instruction typed into the system is logged, including inputs from neighbouring sectors such as an offer of an aircraft. These columns summarise what was entered before the snapshot.
+
+a_since_flight — Seconds since the last input concerning this aircraft. 3,600 means none in the last hour.
+
+a_last_assume_control — 1 if that last input was taking control of the aircraft.
+
+a_last_force_assume_control — 1 if that last input was taking control without waiting for the offer (forced assume).
+
+a_last_assign_level_clearance — 1 if that last input was a level instruction.
+
+a_last_assign_lateral_clearance — 1 if that last input was a heading, direct-to or route instruction.
+
+a_last_initiate_transfer_of_control — 1 if that last input was an offer to hand the aircraft over.
+
+a_last_decontrol — 1 if that last input released control of the aircraft (very rare here).
+
+a_since_any — Seconds since the last input on any aircraft in the session.
+
+a_n60 — Number of inputs on all aircraft in the last 60 seconds, a measure of how busy the moment is.
+
+a_n300 — Number of inputs on all aircraft in the last 5 minutes.
+
+a_is_last_cs — 1 if this aircraft received the most recent input of the session.
+
+a_is_last2_cs — 1 if this aircraft received one of the two most recent inputs.
+
+The task in its list (l_ columns)
+These compare a task with the other tasks of the same sample. Ranks start at 1, and equal values share the lowest rank.
+
+l_n_type — Number of tasks of the same type in the list.
+
+l_frac_type — Share of the list that has this task's type (0 to 1).
+
+l_n_flight — Number of tasks of the same aircraft in the list.
+
+l_twin_AE — 1 if the aircraft has both an assume_aircraft and an entry_coordination task in the list. Such pairs are hard to tell apart, because the aircraft columns are identical.
+
+l_rank_f1_type — Rank of the task by time_to_sector (with sign) among tasks of the same type. 1 = smallest value, i.e. the aircraft deepest inside the sector.
+
+l_rank_absf1_type — Rank by time to the boundary in either direction (absolute time_to_sector) among tasks of the same type. 1 = the aircraft closest to the boundary.
+
+l_rank_f0_type — Rank by distance_to_sector (with sign) among tasks of the same type.
+
+l_rank_absf1_all — Rank by absolute time_to_sector among all tasks in the list.
+
+l_rank_age_type — Rank by task age among tasks of the same type. 1 = the task that has been waiting longest.
+
+Acronyms
+Acronym	Meaning
+ATC	Air Traffic Control
+ATCO	Air Traffic Controller (Officer)
+ATM	Air Traffic Management
+AWARE	The research project and system that produced the task lists (artificial situational awareness for controllers)
+CFL	Cleared Flight Level: the level a controller has told an aircraft to fly
+CPA	Closest Point of Approach: where two aircraft are predicted to be nearest to each other
+ESMM	Malmö area control (ICAO code of the Swedish upper-airspace control centre); ESMM_23 is the sector in this data
+FL	Flight Level: altitude in hundreds of feet at standard pressure (FL 350 ≈ 35,000 ft)
+HMI	Human-Machine Interface: the controller's screen and tools
+ISC	Inter-Sector Coordination: agreement between neighbouring sectors on how an aircraft is handed over
+MD	Minimum Distance: the smallest predicted distance between two aircraft in a conflict
+NM	Nautical Mile (1,852 m)
+QoS	Quality of Service: offering aircraft better routes or levels
+STCA	Short-Term Conflict Alert: the ground system's warning of an imminent loss of separation
+TRA	Temporary Reserved Area: airspace reserved for military use at certain times
+UTC	Coordinated Universal Time

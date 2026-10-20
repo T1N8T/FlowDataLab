@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------
+# Datos del reto (train.csv pesa ~119 MB y supera el límite de
+# 100 MB de GitHub). Se descargan de la competición.
+# ---------------------------------------------------------------
+Data/*.csv
+!Data/sample_submission.csv
+
+# Salidas generadas
+submissions/*
+!submissions/.gitkeep
+models/*
+!models/.gitkeep
+*.pkl
+*.joblib
+*.pt
+*.cbm
+*.parquet
+*.feather
+catboost_info/
+mlruns/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.env
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Sistema / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
