@@ -52,3 +52,4 @@ hora,nombre,grupos,params_cambiados,n_features,cv_top3,std_folds,nota
 00:54,b12c/l63_mc100,alerta+contexto,"{'num_leaves': 63, 'min_child_samples': 100}",99,0.6515,,2 semillas. peor_atco 0.554. sin 0 snapshots al entrenar. idea Pablo 12a
 00:55,b12c/l63_mc100_et,alerta+contexto,"{'num_leaves': 63, 'min_child_samples': 100, 'extra_trees': True}",99,0.6559,,2 semillas. peor_atco 0.565. sin 0 snapshots al entrenar. idea Juanma 13a: 63 hojas + extra_trees
 00:56,b12c/peso_tramo,alerta+contexto,{},99,0.6631,,2 semillas. peor_atco 0.576. sin 0 snapshots al entrenar. peso tramo^0.5. idea Pablo 11e: 1/sqrt(longitud del tramo)
+01:08,lgb_adri_v2,alerta+contexto,{},99,0.6644,,10 semillas. peor_atco 0.579. sin 0 snapshots al entrenar. peso tramo^0.5. versión para el stacking
