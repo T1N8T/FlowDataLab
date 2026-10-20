@@ -14,14 +14,17 @@ Uso:
     python futuro/m_lgb_future.py                                   # 3 semillas, guarda oof/preds/submissions
     python futuro/m_lgb_future.py --quick --leaves 63               # prueba rápida (1 semilla, no guarda)
     python futuro/m_lgb_future.py --quick --feats base,logic,past   # quitar un bloque de features
+    python futuro/m_lgb_future.py --feats base,logic,past,future,clear --sesion --name lgb_future_clear
+        # + segundo paso de sesión (futuro/feat_session.py): guarda también <name>_ses y lo apunta en el registro
 """
-import sys, time, argparse, numpy as np, pandas as pd, lightgbm as lgb
+import sys, time, argparse, fcntl, numpy as np, pandas as pd, lightgbm as lgb
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FUT = ROOT / "futuro"
 sys.path.insert(0, str(ROOT / "cv"))
 import features_future as ff
+import feat_session
 from metric import report, save_outputs, hits, labels
 
 EXP = ROOT / "experiments"
@@ -44,6 +47,7 @@ def parse(argv=None):
     ap.add_argument("--objective", default="lambdarank", help="lambdarank o rank_xendcg")
     ap.add_argument("--folds", default="", help="solo estos folds, p.ej. '0' (pruebas rápidas; no guarda)")
     ap.add_argument("--quick", action="store_true", help="1 semilla y sin guardar oof/preds/submission")
+    ap.add_argument("--sesion", action="store_true", help="segundo paso de sesión (feat_session.py) -> <name>_ses")
     ap.add_argument("--tag", default="", help="nota libre para el registro de experimentos")
     a = ap.parse_args(argv)
     if a.quick: a.seeds = 1
@@ -80,8 +84,10 @@ def log_run(a, cv, fold_cv, min_atco, n_feats, secs, saved):
     row = dict(when=time.strftime("%Y-%m-%d %H:%M"), name=a.name, tag=a.tag, cv=round(cv, 4), min_atco=round(min_atco, 4),
                **{f"fold{k}": round(v, 4) for k, v in fold_cv.items()}, n_feats=n_feats, secs=int(secs), saved=saved,
                **{k: v for k, v in vars(a).items() if k not in ("name", "tag")})
-    old = pd.read_csv(LOG) if LOG.exists() else pd.DataFrame()
-    pd.concat([old, pd.DataFrame([row])], ignore_index=True).to_csv(LOG, index=False)
+    with open(EXP / ".lgb_future_runs.lock", "w") as lock:        # varias pruebas a la vez en gpu.dsic
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        old = pd.read_csv(LOG) if LOG.exists() else pd.DataFrame()
+        pd.concat([old, pd.DataFrame([row])], ignore_index=True).to_csv(LOG, index=False)
 
 
 def run(a, data):
@@ -98,16 +104,31 @@ def run(a, data):
         print(f"  fold {f} ({time.time() - t0:.0f}s)", flush=True)
     done = ~np.isnan(oof)
     oof_df = lab.loc[done, ["sample_id", "row_index"]].assign(score=oof[done])
-    h = hits(oof_df).rename("hit").reset_index().merge(labels(), on="sample_id")
-    cv, fold_cv, min_atco = h.hit.mean(), h.groupby("fold").hit.mean().to_dict(), h.groupby("atco").hit.mean().min()
-    print(f"{a.name}: CV top3 = {cv:.4f}   (min atco {min_atco:.3f})   " +
-          "  ".join(f"f{k}:{v:.3f}" for k, v in fold_cv.items()) + f"   {len(F)} features", flush=True)
+    cv, fold_cv, min_atco = evaluate(a.name, oof_df, len(F))
     saved = not (a.quick or a.folds)
     if saved:
         pred = np.mean([fit(a, lab, F, s).predict(te[F]) for s in range(a.seeds)], axis=0)
         save_outputs(a.name, oof_df, te[["sample_id", "row_index"]].assign(score=pred), out=FUT)
     log_run(a, cv, fold_cv, min_atco, len(F), time.time() - t0, saved)
+    if a.sesion and not a.folds:
+        so, sp, w = feat_session.sesion(lab, oof, te, pred) if saved else feat_session.sesion(lab, oof)
+        print(f"  pesos del segundo paso: {w}")
+        ses = argparse.Namespace(**{**vars(a), "name": a.name + "_ses", "tag": (a.tag + " +sesion").strip()})
+        oof_ses = lab[["sample_id", "row_index"]].assign(score=so)
+        cvs, fold_s, min_s = evaluate(ses.name, oof_ses, len(F))
+        if saved:
+            save_outputs(ses.name, oof_ses, te[["sample_id", "row_index"]].assign(score=sp), out=FUT)
+        log_run(ses, cvs, fold_s, min_s, len(F), time.time() - t0, saved)
+        return cvs
     return cv
+
+
+def evaluate(name, oof_df, n_feats):
+    h = hits(oof_df).rename("hit").reset_index().merge(labels(), on="sample_id")
+    cv, fold_cv, min_atco = h.hit.mean(), h.groupby("fold").hit.mean().to_dict(), h.groupby("atco").hit.mean().min()
+    print(f"{name}: CV top3 = {cv:.4f}   (min atco {min_atco:.3f})   " +
+          "  ".join(f"f{k}:{v:.3f}" for k, v in fold_cv.items()) + f"   {n_feats} features", flush=True)
+    return cv, fold_cv, min_atco
 
 
 def main():
