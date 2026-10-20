@@ -1,6 +1,7 @@
 """
-Feature engineering compartido (FlowDataLab).
-Uso:  python src/features.py   -> escribe models/features.parquet (train+validation+test, con fold por atco)
+features.py · común (dueño: Adri, B) · Feature engineering compartido.
+Uso:  python src/features.py   -> escribe models/features.parquet (train+validation+test, con fold de Data/folds.csv)
+      from features import load_feats   -> lo carga ordenado por sample_id, row_index (el orden de oof/ y preds/)
 
 Bloques de features:
 - base: columnas originales
@@ -21,8 +22,6 @@ ENTRY_TYPES, EXIT_TYPES = [0, 2, 4, 9], [1, 3, 5, 10]
 NEEDS_CONTROL = [1, 3, 6, 7, 8, 10, 12, 13]          # requieren dar instrucciones -> avión asumido
 ACTS = ["assume_control", "force_assume_control", "assign_level_clearance", "assign_lateral_clearance",
         "initiate_transfer_of_control"]
-# Folds fijos por controlador (020 tiene validación -> va a un fold como cualquier otro)
-N_FOLDS = 5
 META = ['sample_id', 'target_index', 'session', 'atco', 'scenario', 'timestamp', 'task_name', 'row_index',
         'cs', 't', 'split', 'fold', 'block']
 
@@ -38,9 +37,10 @@ def load():
 
 
 def add_folds(d):
-    atcos = sorted(d.loc[d.split != "test", "atco"].unique())
-    fmap = {a: i % N_FOLDS for i, a in enumerate(atcos)}
-    d["fold"] = d.atco.map(fmap).fillna(-1).astype(int)
+    """Folds comunes del equipo (Data/folds.csv, python src/folds.py). Test -> -1."""
+    folds = pd.read_csv(DATA / "folds.csv")
+    d["fold"] = d.atco.map(dict(zip(folds.atco, folds.fold))).fillna(-1).astype(int)
+    assert (d.loc[d.split != "test", "fold"] >= 0).all(), "hay controladores etiquetados sin fold en Data/folds.csv"
     d.loc[d.split == "test", "fold"] = -1
     return d
 
@@ -155,6 +155,16 @@ def build():
     d = add_future(d)
     d = add_past(d)
     return d
+
+
+def load_feats():
+    """models/features.parquet ordenado por sample_id, row_index. Comprueba que sus folds son los de Data/folds.csv."""
+    d = pd.read_parquet(MODELS / "features.parquet")
+    folds = pd.read_csv(DATA / "folds.csv")
+    lab = d.split != "test"
+    assert (d.loc[lab, "fold"].values == d.loc[lab, "atco"].map(dict(zip(folds.atco, folds.fold))).values).all(), \
+        "features.parquet tiene otros folds: regenerar con python src/features.py"
+    return d.sort_values(["sample_id", "row_index"]).reset_index(drop=True)
 
 
 def feature_sets(d):
