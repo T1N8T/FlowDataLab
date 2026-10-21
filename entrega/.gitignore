@@ -1,0 +1,7 @@
+# datos de Kaggle (no se redistribuyen: copiarlos a datos/ desde Kaggle o la carpeta compartida)
+datos/train.csv
+datos/validation.csv
+datos/test.csv
+# cachés de features y semillas (se regeneran)
+cache/
+__pycache__/
