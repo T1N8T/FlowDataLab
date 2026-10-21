@@ -57,6 +57,18 @@ def orc_cache(lab, te, var):
     """Oráculo por fold (y para el modelo final), cacheado en parquet: es caro y no depende de la prueba.
     var "gate" (f11): el oráculo completo ("base") solo en las filas SIN huella propia (sin instrucción compatible
     <= 60 s, sin desaparecer <= 30 s y sin cambio de su estado <= 60 s); en las demás, vacío."""
+    if var in ("exit", "entry"):       # oráculo de coordinaciones solo en exit_coordination (3) o entry_coordination (2)
+        X, cols = orc_cache(lab, te, "coord")
+        ti = np.concatenate([lab.task_index.values, te.task_index.values])
+        X = X.copy()
+        X.loc[ti != (3 if var == "exit" else 2), :] = np.nan
+        return X, cols
+    if var in ("Bcoord", "Ecoord"):    # variantes B/E del oráculo (más ventanas, núcleo, tiempo relativo) solo en coordinaciones
+        X, cols = orc_cache(lab, te, var[0])
+        ti = np.concatenate([lab.task_index.values, te.task_index.values])
+        X = X.copy()
+        X.loc[~np.isin(ti, [2, 3]), :] = np.nan
+        return X, cols
     if var == "gate":
         X, cols = orc_cache(lab, te, "base")
         D = pd.concat([lab[["si_match", "f_task_end", "sx_task"]], te[["si_match", "f_task_end", "sx_task"]]],

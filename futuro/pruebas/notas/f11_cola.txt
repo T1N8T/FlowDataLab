@@ -11,3 +11,7 @@ causalorc | --add causal --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "cz_
 mono | --mono "si_match:-1,si_match_rk:-1" --seeds 3 --threads 8 --tag "monótona: antes la instrucción compatible -> más probable"
 n300 | --params '{"n_estimators": 300}' --seeds 3 --threads 8 --tag "menos árboles (800 restaba)"
 n250 | --params '{"n_estimators": 250}' --seeds 3 --threads 8 --tag "menos árboles (800 restaba)"
+orcBc | --orc --orc-var Bcoord --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo variante B (ventanas 30/300/600 s, núcleo) solo en coordinaciones"
+orcEc | --orc --orc-var Ecoord --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo variante E (B + tiempo relativo al avión) solo en coordinaciones"
+orcexit | --orc --orc-var exit --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo solo en exit_coordination (C pierde en entry_coordination)"
+orcc | --orc --seeds 10 --seed0 20 --test --threads 8 --ref f10_instr_l63_s10 --tag "N + oráculo de coord., semillas 20-29 + test (para 30 semillas)"
