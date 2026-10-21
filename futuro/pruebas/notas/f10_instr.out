@@ -1,0 +1,3 @@
+[f10] f10_instr_s3                   CV top3 = 0.9099  min atco 0.763  std folds 0.025
+[f10] f10_instr_s3_ses               CV top3 = 0.9153  min atco 0.772  std folds 0.024
+f10_instr_s3: 1.er pase 0.9099 (CV 023 0.9089) · + sesión 0.9153 (CV 023 0.9159, peor 0.772)  153 features (208s)

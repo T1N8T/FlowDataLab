@@ -1,0 +1,16 @@
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/feat_oracle.py:110: RuntimeWarning: All-NaN slice encountered
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+oráculo coord calculado (10s)
+[f10] f10_instr_or_s3                CV top3 = 0.9158  min atco 0.781  std folds 0.020
+[f10] f10_instr_or_s3_ses            CV top3 = 0.9233  min atco 0.796  std folds 0.021
+f10_instr_or_s3: 1.er pase 0.9158 (CV 023 0.9157) · + sesión 0.9233 (CV 023 0.9243, peor 0.796)  163 features (227s)

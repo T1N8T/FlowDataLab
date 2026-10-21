@@ -1,0 +1,2 @@
+umbral 0.97: 3793 snapshots seguros (28.8%); su top-1 acierta 0.994
+pseudo (1 semilla): + sesión 0.9110 (CV 023 0.9074, peor 0.769) frente a sin pseudo 0.9132 (CV 023 0.9214, peor 0.778)
