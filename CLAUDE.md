@@ -1,59 +1,34 @@
 # FlowDataLab – AWARE Prioritisation Challenge (Engage 2, Zagreb)
 
-> **El plan de equipo vigente está en `EQUIPO.md`** (roles: Pablo = A redes neuronales, Adri = B GBM + features, Juanma = C folds/métrica, modelos alternativos, stacking y envíos, Pau = D EDA/errores/slides). Si este archivo y `EQUIPO.md` no coinciden, manda `EQUIPO.md`. Pregunta al usuario quién es si no lo dice.
+> Antes de proponer nada, lee **`EQUIPO.md`** (estado del proyecto, entregas y normas de trabajo) y, si hace falta contexto sobre
+> por qué funcionan o no los modelos, **`notebooks/00_destilado.ipynb`**. El diario detallado de la línea con futuro es
+> `futuro/LGB_futuro.ipynb` (secciones 0–24). Si este archivo y `EQUIPO.md` no coinciden, manda `EQUIPO.md`.
 
-Equipo de 4: Pablo, Adrián, Pau, Juanma. Hackathon de 24 h. Kaggle cierra el **miércoles 21/10 a las 13:00** (hora de Zagreb).
+Equipo de 4 (Pablo, Adri, Juanma, Pau), sin reparto fijo: ayuda a quien te hable en lo que pida. Kaggle cierra el
+**miércoles 21/10 a las 13:00** (hora de Zagreb).
 
 ## El reto
-- Cada `sample_id` es un snapshot de la lista de tareas abiertas del controlador aéreo (9–59 tareas, ~36 de media). Cada fila es una tarea.
-- Exactamente una fila por snapshot tiene `target_index = 1`: la tarea en la que trabaja el controlador.
-- Hay que predecir los 3 `row_index` más probables por snapshot, el mejor primero.
-- **Métrica:** top-3 hit rate. Baselines en test: aleatorio 0.094, `sample_submission` 0.352.
-- **Leaderboards:** el público es solo el controlador 020 (915 muestras). El privado, que decide, es el controlador 023 (948 muestras).
-- **Envíos:** 5 al día por equipo; el día de Kaggle empieza a las 02:00 de Zagreb. Al final se eligen 2 entregas.
-- Descripción completa de columnas: `Context/Data.txt`. Descripción del reto: `Context/Overview.txt`.
+- Cada `sample_id` es un snapshot de la lista de tareas del controlador aéreo; una fila por tarea y exactamente una con
+  `target_index = 1`. Se predicen los 3 `row_index` más probables. Métrica: top-3 hit rate.
+- Público = controlador 020; privado (decide) = controlador 023. Se puede usar **cualquier información de los datasets**
+  (snapshots pasados y futuros de la sesión, etiquetas de otras sesiones de train/validation), confirmado por el organizador.
 
-## Reglas que hemos decidido (no saltárselas)
-1. **Cada snapshot se predice solo con sus propias filas.** Nada de usar otros snapshots de la misma sesión, ni pasados ni futuros (features, suavizado temporal, etc.). El organizador nos ha pedido conseguir primero la mejor nota así. Más adelante puede que se permita usar otros snapshots; hasta entonces, prohibido.
-2. **Validación:** GroupKFold de 5 folds por `atco`, con los folds de `Data/folds.csv` (columnas `atco`, `fold`). Nadie crea sus propios folds ni hace splits aleatorios por filas.
-3. **Las decisiones se toman por la CV**, no por el leaderboard público (es un solo controlador y el privado es otro).
-4. **No usar como features:** `sample_id`, `target_index`, `session`, `atco`, `scenario`, `timestamp`, `task_name`. `row_index` solo si el EDA demuestra que aporta.
-5. Las celdas vacías significan "no aplica", nunca 0. LightGBM las maneja de forma nativa; en redes neuronales se usa relleno + indicador de vacío.
-6. Se entrena con `train.csv` + `validation.csv` juntos.
-
-## Formato común de salidas (obligatorio para el stacking)
-- `oof/<modelo>.csv`: predicciones out-of-fold de train+validation, con columnas `sample_id,row_index,score`.
-- `preds/<modelo>.csv`: predicciones de test con el modelo entrenado con todo, mismo formato.
-- `submissions/sub_<modelo>.csv`: columnas `sample_id,prediction`, con 3 `row_index` separados por espacios, el mejor primero.
-- Comprobar en validación con: `python Data/scorer.py --labelled Data/validation.csv <sub>.csv`
-
-## Estructura del repo
-La estructura vigente (archivos y dueños) está en `EQUIPO.md`, sección «Estructura del repo».
-Cada persona trabaja en su rama de git. Los CSV grandes se comparten por carpeta compartida, no por git.
-
-## Reparto
-- **Pau:** EDA (estructura, lift por tipo, qué distingue a la tarea correcta, vacíos), `features.py` y `m_lgb.py`. Es el modelo de referencia.
-- **Adrián:** EDA del caso assume vs entry_coordination (`l_twin_AE`), `m_types.py` (P(tipo) × ranker dentro del tipo) y la variante de dos etapas avión → tarea.
-- **Pablo:** `m_nn.py`, el transformer sobre el conjunto de tareas del snapshot: embedding de `task_index`, encoder sin codificación de posición, softmax sobre la lista y cross-entropy con label smoothing. Límite de unas 4 h; a las 21:00, si su CV está a más de ~3 puntos del LightGBM, pasa a ayudar a otros. Mañana: slides para el jurado.
-- **Juanma:** `folds.py` y `metric.py` lo primero; luego XGBoost/CatBoost, el stacking y la gestión de envíos (nadie más sube a Kaggle).
-
-## Calendario
-- 19:00 martes: puesta en común (CV de cada uno y features nuevas).
-- Noche: primer stacking, que se sube después de las 02:00 (se renuevan los envíos).
-- 08:00 miércoles: puesta en común. Si se permiten otros snapshots, añadir esas features.
-- 11:00–12:30: elegir las 2 entregas finales por CV (la mejor y una segura). Slides.
-- 13:00: cierre.
-
-## Resultados conocidos
-- LightGBM LambdaRank con las columnas originales, solo el snapshot: **CV 0.655** (GroupKFold por atco).
-- Añadir rankings relativos sencillos dentro del snapshot: 0.652 (sin mejora; hay que trabajar mejor esas features).
-- Usando snapshots futuros (siguiente input del controlador sobre el avión, a partir de `a_since_flight`): 0.83. **No permitido por ahora.**
-
-## Ojo
-- Los modelos con snapshots pasados/futuros viven en `futuro/` (ver `futuro/README.md`) y guardan en `futuro/oof|preds|submissions`; `stacking/stack.py` solo los usa con `--futuro`. El resto del flujo de `main` no cambia.
-- Las etiquetas tienen ruido y los controladores no coinciden mucho entre sí: el techo está bastante por debajo de 1. Preferir modelos robustos a los sobreajustados.
-
-## Cómo trabajar con Claude en este repo
-- Antes de añadir una feature, comprobar que solo usa filas del mismo `sample_id`.
-- Todo modelo nuevo debe usar `Data/folds.csv`, imprimir su CV top-3 y guardar `oof/` y `preds/` en el formato común.
-- Cambios mínimos en el código existente; código completo y listo para copiar.
+## Cómo trabajar en este repo
+- **Antes de probar algo, comprueba que no está ya probado** en `EQUIPO.md` (sección 2), en la sección 5 de
+  `notebooks/00_destilado.ipynb` y en `futuro/pruebas/resultados.jsonl`. Casi todo lo razonable ya se ha medido.
+- **Validación:** siempre `Data/folds.csv` (GroupKFold por controlador). Nada de splits aleatorios.
+- **Comparar con la referencia con las mismas semillas** y con todas las métricas: `python futuro/pruebas/comparar.py <ref> <cand>`
+  (media, mediana por sesión, sesiones/controladores que suben y bajan, bootstrap, escenarios) y la CV 023. Ruido: ±0.2 con 3
+  semillas. Una mejora solo cuenta si sube media y mediana sin hundir al peor controlador.
+- **Sin fuga:** etiquetas solo de los folds de entrenamiento; el oráculo, por fold; parámetros de post-procesos y mezclas con CV
+  anidada. Di explícitamente cuándo una cifra es optimista (elegida con todo el OOF).
+- **Reutiliza el código existente:** `futuro/pruebas/base_fut.py` (datos con caché, `lgb_cv`, `guardar`, `registrar`),
+  `f10_instr.py` (bloque `instr`, modelos N/NOR), `f11_lab.py` (banco de pruebas de Pablo), `futuro/feat_session.py` (segundo paso),
+  `futuro/pruebas/suavizado.py`, `cv/metric.py`. Crea scripts nuevos en lugar de modificar los de otros; si hay que tocarlos, cambios
+  mínimos y opcionales (que no cambien el comportamiento por defecto).
+- **Salidas:** formato común `sample_id,row_index,score` en la carpeta `oof|preds|submissions` de su línea; regístralas. En
+  `futuro/pruebas/` las salidas no se versionan (`.gitignore`) salvo las de las entregas (`git add -f`).
+- **Entrenamientos largos:** en segundo plano (nohup), sin bloquear la conversación; responde enseguida y da el estado cuando acabe.
+- **Notebooks:** cada conclusión nueva va a la sección correspondiente de su notebook, con cifras, veredicto y qué se aprendió.
+- **No subas nada a Kaggle ni hagas commit/push sin que te lo pidan.** No inventes resultados: si algo no se ha ejecutado, dilo.
+- Código completo y listo para ejecutar; respuestas concisas y en español.
