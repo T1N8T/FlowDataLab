@@ -45,3 +45,10 @@ desktop.ini
 *.swp
 
 *.pdf
+# Búsqueda nocturna del modelo realista (Adri): caché de features y semillas intermedias, muy pesadas
+realista/noche/cache_features.pkl
+realista/noche*/oof/
+realista/noche*/pred/
+realista/noche_prueba/
+realista/__pycache__/
+experiments/.lgb_real_runs.lock
