@@ -4,8 +4,9 @@ Equipo: Pablo, Adri, Juanma y Pau. Ya no hay reparto fijo de tareas: cualquiera 
 **normas de trabajo** (sección 4). Este archivo es el punto de partida; el resumen razonado y ejecutable está en
 **`notebooks/00_destilado.ipynb`**.
 
-Kaggle cierra el **miércoles 21/10 a las 13:00** (hora de Zagreb). 5 envíos al día (el día empieza a las 02:00). Al cierre se marcan
-**2 entregas** y el privado se puntúa con la mejor de las dos.
+Kaggle cierra el **miércoles 21/10 a las 13:00** (hora de Zagreb). 5 envíos al día (el día empieza a las 02:00). Al cierre se elige
+**una sola entrega**; la clasificación final es **solo su nota en el privado** (controlador 023, el 51 % de las filas de test; el público,
+020, es el otro 49 % y solo orienta). El organizador ha avisado de un fuerte sobreajuste al público en la competición.
 
 ---
 
@@ -67,9 +68,9 @@ oráculo recortado (solo exit o solo sin huella), más de ~20 semillas.
 | B | `futuro/submissions/sub_suav_lgb_future_clear10_orcoord_ses.csv` | 0.925 | 0.934 |
 | Limpia (solo el snapshot) | `submissions/sub_lgb_adri_v2.csv` | 0.664 | 0.642 |
 
-**Pareja final recomendada: M30_30 + N** (una con oráculo y otra sin él; `LGB_futuro.ipynb`, 24l). Si el oráculo transfiere al
-023 como dice la CV, cuenta M30; si falla como en el 020, cuenta N. Dos con oráculo (M30 + B) ganan algo más en la simulación, pero
-no cubren ese fallo.
+**Entrega final recomendada: `futuro/pruebas/submissions/sub_f11_M30_30.csv`** (elegida por el privado esperado, sección 6 de
+`notebooks/00_destilado.ipynb` y `futuro/pruebas/f13_eleccion.py`): +0.54 frente a N con cinco métodos distintos, la que elige la regla
+"por CV" en 16 de 18 controladores y sin pérdidas de más de 1 punto frente a N en ninguno. C30 y NOR quedan muy cerca (+0.50 / +0.49).
 
 ## 4. Normas de trabajo
 1. **Validación:** siempre `Data/folds.csv` (GroupKFold por controlador). Nunca splits aleatorios por filas o snapshots.
