@@ -1,22 +1,27 @@
 """
-m_mix_real.py · RAMA "REALISTA" · LightGBM con el bloque ctx y dos objetivos (lambdarank y softmax sobre la lista),
-mezclado con real_adri_noche. Solo el snapshot actual y snapshots PASADOS (features_real.py): nada del futuro ni oráculo.
+m_mix_real.py · RAMA "REALISTA" · Entrada única del modelo realista final: miembros LightGBM (parámetros b045 de la
+búsqueda nocturna de Adri) y su mezcla con real_adri_noche. Solo el snapshot actual y snapshots PASADOS: nada del futuro ni
+oráculo. Sección 5 de LGB_realista.ipynb.
 
-Miembros (parámetros b045 de la búsqueda nocturna de Adri; bloques base + logic + past + causal + geo [+ ctx]):
-    b045     lambdarank, sin ctx                      (referencia con la misma semilla)
-    ctx      lambdarank + ctx                         (+0.2 sobre b045 con las mismas semillas)
-    sm       softmax sobre la lista, sin ctx          (objetivo propio: grad = p - y, hess = p (1 - p) por snapshot)
+Miembros (bloques base + logic + past + causal + geo, más):
+    b045     nada más (referencia con la misma semilla)
+    ctx      + ctx (feat_ctx.py): sube en la CV global, baja en los controladores parecidos al 023 (5c)
+    sm       objetivo softmax sobre la lista (grad = p - y, hess = p (1 - p) por snapshot), sin ctx
     sm_ctx   softmax + ctx
-Cada miembro = media de z-scores (en el snapshot) de sus semillas. Mezcla por defecto: real_adri_noche + ctx, pesos
-iguales -> realista/oof|preds|submissions/<name>.csv. Cada miembro también se guarda como real_<miembro>.
-Con 1 semilla softmax parecía sumar en mezcla; con 3 semillas no aporta de forma fiable (sección 5 de LGB_realista.ipynb).
-Las semillas se guardan en models/real_mix/ (no versionado): si ya existen, se leen y no se reentrena.
+    sty      + estilo del controlador estimado de sus inputs anteriores (lab/extra_sty.py)
+    trig     + qué disparó la racha (lab/extra_trig.py = fe_trig de claude_mejoras.py, Adri)
+    sty_trig + sty + trig
+Cada miembro = media de z-scores (en el snapshot) de sus semillas, guardadas en models/real_mix/ (no versionado; si ya
+existen, se leen y no se reentrena) y escritas como real_<miembro>. La mezcla es una media ponderada de z-scores
+("noche" = realista/oof|preds/real_adri_noche.csv) -> realista/oof|preds|submissions/<name>.csv.
 
-Uso (desde la raíz; ~4 min por semilla y miembro con 4 hilos):
-    python realista/m_mix_real.py                                   # ctx con 4 semillas + mezcla real_mix
-    python realista/m_mix_real.py --miembros ctx --seeds 5          # añade semillas a un miembro
-    python realista/m_mix_real.py --miembros sm_ctx --seeds 3       # otro miembro (sin cambiar la mezcla)
-    python realista/m_mix_real.py --miembros "" --mezcla noche,ctx,sm_ctx --name real_mix3   # solo mezcla
+Entrega realista para el privado: real_adri_noche tal cual (5e): ninguna mezcla de estos miembros sube en los controladores
+parecidos al 023. Este script queda para seguir iterando; comprobad cada mezcla con realista/lab/robustez.py.
+
+Uso (desde la raíz; ~4 min por semilla y miembro con 4 hilos; mirad antes la carga de la máquina):
+    python realista/m_mix_real.py                                          # sty (4 semillas) + real_noche_sty
+    python realista/m_mix_real.py --miembros trig --seeds 2 --mezcla noche:1,sty:0.25,trig:0.25 --name real_nst
+    python realista/m_mix_real.py --miembros "" --mezcla noche:1,ctx:1 --name real_mix     # solo mezcla
 """
 import sys, time, argparse
 from pathlib import Path
@@ -37,7 +42,10 @@ CV023 = [2, 11, 10, 6, 17, 15]
 B045 = dict(n_estimators=756, lr=0.01864, leaves=37, min_child=25, subsample=0.93956, colsample=0.77206,
             reg_lambda=21.55722, min_gain=0.0005, max_bin=63, cat_smooth=1.50382, trunc=8)
 MIEMBROS = dict(b045=dict(obj="lambdarank", feats=FEATS), ctx=dict(obj="lambdarank", feats=FEATS + ["ctx"]),
-                sm=dict(obj="softmax", feats=FEATS), sm_ctx=dict(obj="softmax", feats=FEATS + ["ctx"]))
+                sm=dict(obj="softmax", feats=FEATS), sm_ctx=dict(obj="softmax", feats=FEATS + ["ctx"]),
+                sty=dict(obj="lambdarank", feats=FEATS + ["sty"]), trig=dict(obj="lambdarank", feats=FEATS + ["trig"]),
+                sty_trig=dict(obj="lambdarank", feats=FEATS + ["sty", "trig"]))
+EXTRA = ("sty", "trig")                                     # bloques de realista/lab/extra_<nombre>.py
 
 
 def datos():
@@ -51,8 +59,12 @@ def datos():
         d[f64] = d[f64].astype("float32")
         MIX.mkdir(parents=True, exist_ok=True)
         d.to_pickle(cache)
+    fs = fr.feature_sets(d)
+    sys.path.insert(0, str(REAL / "lab"))
+    for nombre in EXTRA:
+        d, fs[nombre] = __import__(f"extra_{nombre}").add(d)
     print(f"features listas ({time.time() - t0:.0f}s)", flush=True)
-    return d[d.split != "test"].reset_index(drop=True), d[d.split == "test"].reset_index(drop=True), fr.feature_sets(d)
+    return d[d.split != "test"].reset_index(drop=True), d[d.split == "test"].reset_index(drop=True), fs
 
 
 def softmax_obj(group):
@@ -140,11 +152,11 @@ def guardar(name, lab, te, o, p, ref, feats, n, t0):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--miembros", default="ctx", help="miembros que entrenar (vacío = ninguno)")
+    ap.add_argument("--miembros", default="sty", help="miembros que entrenar (vacío = ninguno)")
     ap.add_argument("--seeds", type=int, default=4)
     ap.add_argument("--threads", type=int, default=4)
-    ap.add_argument("--mezcla", default="noche,ctx", help="miembros de la mezcla (pesos iguales)")
-    ap.add_argument("--name", default="real_mix")
+    ap.add_argument("--mezcla", default="noche:1,sty:0.25", help="miembro:peso,... (sin peso = 1)")
+    ap.add_argument("--name", default="real_noche_sty")
     a = ap.parse_args()
     t0 = time.time()
     lab, te, fs = datos()
@@ -153,9 +165,12 @@ def main():
         semillas(nombre, lab, te, fs, a.seeds, a.threads)
         o, p, n = miembro(nombre, lab, te)
         guardar(f"real_{nombre}", lab, te, o, p, ref, "+".join(MIEMBROS[nombre]["feats"]), n, t0)
-    partes = [miembro(x, lab, te) for x in a.mezcla.split(",")]
-    o, p = np.mean([x[0] for x in partes], axis=0), np.mean([x[1] for x in partes], axis=0)
-    guardar(a.name, lab, te, o, p, ref, f"mezcla {a.mezcla}", sum(x[2] for x in partes), t0)
+    pesos = [(x.split(":")[0], float(x.split(":")[1]) if ":" in x else 1.0) for x in a.mezcla.split(",")]
+    partes = [(miembro(n, lab, te), w) for n, w in pesos]
+    tot = sum(w for _, w in partes)
+    o = sum(w * x[0] for x, w in partes) / tot
+    p = sum(w * x[1] for x, w in partes) / tot
+    guardar(a.name, lab, te, o, p, ref, f"mezcla {a.mezcla}", sum(x[2] for x, _ in partes), t0)
 
 
 if __name__ == "__main__":
