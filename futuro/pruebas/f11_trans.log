@@ -1,0 +1,17 @@
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/pruebas/f11_trans.py:51: RuntimeWarning: All-NaN slice encountered
+  sinx = np.nanmin(d[[c for c in d.columns if c.startswith("si_next_")]].values, axis=1)
+/home/alumno.upv.es/jmflodel/FlowDataLab/futuro/pruebas/f11_trans.py:51: RuntimeWarning: All-NaN slice encountered
+  sinx = np.nanmin(d[[c for c in d.columns if c.startswith("si_next_")]].values, axis=1)
+preparado: 13138 pares lab, 1858 test (4s)
+pesos (todo lab) dentro racha: {'stay': np.float64(7.52), 'samecs': np.float64(2.22), 'A_res': np.float64(-0.05), 'A_any': np.float64(0.27), 'Bnew': np.float64(-0.32), 'Bnew*A_res': np.float64(0.21)} 
+               entre rachas: {'stay': np.float64(-0.91), 'samecs': np.float64(0.96), 'A_res': np.float64(2.02), 'A_any': np.float64(-0.94), 'Bnew': np.float64(-0.98), 'Bnew*A_res': np.float64(0.23)}
+externo listo (38s)
+sin anidar (optimista): ['0.9233 (1.0, 0.0, 0.0, 1.0)', '0.9223 (0.35, 1.0, 0.5, 0.5)', '0.9218 (1.0, 0.5, 1.0, 0.5)', '0.9218 (1.0, 0.5, 0.5, 0.5)', '0.9217 (1.0, 1.0, 0.5, 0.5)', '0.9217 (0.35, 0.5, 0.5, 0.5)']  nada: 0.9233
+  fold 0: elegido (1.0, 0.0, 0.0, 1.0)  (60s)
+  fold 1: elegido (1.0, 0.0, 0.0, 1.0)  (85s)
+  fold 2: elegido (1.0, 1.0, 1.0, 0.5)  (108s)
+  fold 3: elegido (1.0, 0.0, 0.0, 1.0)  (133s)
+  fold 4: elegido (1.0, 0.0, 0.0, 1.0)  (156s)
+f10_instr_l63_s3_ses: 0.9233 (CV 023 0.9256, peor 0.784) -> anidada 0.9212 (CV 023 0.9263, peor 0.784) Δ -0.20 · final (1.0, 0.0, 0.0, 1.0): 0.9233 (CV 023 0.9256) (160s)
+[f11] f11_trans                      CV top3 = 0.9233  min atco 0.784  std folds 0.020
+[f11] f11_trans_anid                 CV top3 = 0.9212  min atco 0.784  std folds 0.022

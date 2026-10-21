@@ -1,0 +1,5 @@
+N+REF log: anidada 0.9242 (+0.00) CV023 0.9273 peor 0.7840 w_full 0.15 w_folds [np.float64(0.15), np.float64(0.0), np.float64(0.15), np.float64(0.15), np.float64(0.15)] ec020 0.540
+N+I31 log: anidada 0.9237 (-0.05) CV023 0.9278 peor 0.7781 w_full 0.05 w_folds [np.float64(0.05), np.float64(0.05), np.float64(0.0), np.float64(0.0), np.float64(0.1)] ec020 0.538
+N+REFOR log: anidada 0.9244 (+0.02) CV023 0.9304 peor 0.7929 w_full 0.5 w_folds [np.float64(0.1), np.float64(0.1), np.float64(0.15), np.float64(0.5), np.float64(0.5)] ec020 0.428
+N+OR log + SB coord: anidada 0.9243 (+0.02) CV023 0.9287 peor 0.7840 full (np.float64(0.1), np.float64(0.8)) (CV 0.9287) folds [(np.float64(0.5), np.float64(0.0)), (np.float64(0.1), np.float64(0.8)), (np.float64(0.4), np.float64(0.8)), (np.float64(0.5), np.float64(0.0)), (np.float64(0.1), np.float64(0.8))] ec020 0.432
+[f11] f11_mezclas_N_OR_SBcoord       CV top3 = 0.9287  min atco 0.784  std folds 0.021
