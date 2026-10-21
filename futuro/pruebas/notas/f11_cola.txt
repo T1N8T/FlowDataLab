@@ -36,3 +36,5 @@ watcoorc10 | --weight atco:0.5 --orc --seeds 10 --test --threads 8 --ref f11_orc
 mbin63orc10 | --params '{"max_bin": 63}' --orc --seeds 10 --test --threads 8 --ref f11_orc_s10 --tag "max_bin 63 + oráculo, 10 semillas (confirmación)"
 coordorc | --feats base,logic,past,future,clear,instr,coord --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "bloque coord (sc_*) sobre N + oráculo: en el modelo antiguo no aportaba; con extra_trees no se había medido"
 coordN | --feats base,logic,past,future,clear,instr,coord --seeds 3 --threads 8 --tag "bloque coord (sc_*) sobre N"
+jitorc | --jitter --orc --seeds 10 --seed0 30 --test --threads 8 --ref f11_orc_s10 --tag "C con parámetros sacudidos por semilla (semillas 30-39) + test"
+jitN | --jitter --seeds 10 --seed0 30 --test --threads 8 --ref f10_instr_l63_s10 --tag "N con parámetros sacudidos por semilla (semillas 30-39) + test"

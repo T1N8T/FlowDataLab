@@ -43,6 +43,7 @@ def parse(argv=None):
     ap.add_argument("--orc", action="store_true", help="oráculo de coordinaciones (feat_oracle, variante coord)")
     ap.add_argument("--orc-var", default="coord")
     ap.add_argument("--obj", default="lambdarank", help="lambdarank (N) o softmax (entropía cruzada listwise, f11)")
+    ap.add_argument("--jitter", action="store_true", help="parámetros sacudidos por semilla (hojas, min_child, colsample, subsample)")
     ap.add_argument("--grado-orc", type=float, default=0.0,
                     help="relevancia 1 a las tareas que otros controladores trabajaron a ±60 s (or_near60 del oráculo "
                          "completo >= este umbral); la respuesta propia vale 2")
@@ -140,6 +141,10 @@ def softmax_obj(y, s, w, group):
 
 
 def fit(a, A, F, P, seed, y=None):
+    if a.jitter:      # bagging con parámetros sacudidos alrededor de N (cada semilla, otros valores)
+        r = np.random.default_rng(1000 + seed)
+        P = {**P, "num_leaves": int(r.choice([47, 63, 79])), "min_child_samples": int(r.choice([80, 100, 120])),
+             "colsample_bytree": float(r.choice([0.6, 0.7, 0.8])), "subsample": float(r.choice([0.7, 0.8, 0.9]))}
     if a.obj == "softmax":
         P = {k: v for k, v in P.items() if k not in ("objective", "lambdarank_truncation_level")}
         P["objective"] = softmax_obj
@@ -165,7 +170,7 @@ def medir(a, nm, lab, n_feats=None, blocks=(), seeds=(), secs=None):
         extra = {k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else int(v)) for k, v in m.items()
                  if k not in ("cv", "min_atco")}
         registrar(nm + suf, hilo="f11", descripcion=f"{a.tag} blocks={list(blocks)} params={a.params} orc={a.orc} "
-                  f"weight={a.weight} drop={a.drop} obj={a.obj} ls={a.ls} mono={a.mono} grado_orc={a.grado_orc} seeds={list(seeds)} ref={ref}", n_features=n_feats, segundos=secs,
+                  f"weight={a.weight} drop={a.drop} obj={a.obj} ls={a.ls} mono={a.mono} grado_orc={a.grado_orc} jitter={a.jitter} seeds={list(seeds)} ref={ref}", n_features=n_feats, segundos=secs,
                   extra=extra)
         res[suf] = m
     return res
