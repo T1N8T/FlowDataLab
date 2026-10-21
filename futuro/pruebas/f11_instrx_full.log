@@ -1,0 +1,3 @@
+[f11] f11_instrx_full_s3             CV top3 = 0.9118  min atco 0.763  std folds 0.026
+[f11] f11_instrx_full_s3_ses         CV top3 = 0.9184  min atco 0.778  std folds 0.026
+f11_instrx_full_s3: 1.er pase 0.9118 (CV 023 0.9146, peor 0.763) · + sesión 0.9184 (CV 023 0.9223, peor 0.778)  172 features (969s)

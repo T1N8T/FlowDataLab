@@ -1,0 +1,8 @@
+escen_ACO: CV anidada 0.9226; elegidos por fold {'1': ['suav_lgb_future_clear10_or_ses', 'suav_lgb_future_clear10_or_ses', 'suav_lgb_future_clear10_or_ses', 'suav_lgb_future_clear10_or_ses', 'suav_lgb_future_clear10_or_ses'], '2': ['suav_f5_clear_l63_10_ses', 'suav_f5_clear_l63_10_ses', 'suav_f5_clear_l63_10_ses', 'suav_lgb_future_clear10_or_ses', 'suav_f5_clear_l63_10_ses'], '3': ['suav_lgb_future_clear10_or_ses', 'suav_lgb_future_clear10_ses', 'suav_lgb_future_clear10_ses', 'suav_lgb_future_clear10_ses', 'suav_lgb_future_clear10_or_ses']}; final {np.int64(1): 'suav_lgb_future_clear10_or_ses', np.int64(2): 'suav_f5_clear_l63_10_ses', np.int64(3): 'suav_lgb_future_clear10_ses'}
+escen_ACO - suav_lgb_future_clear10_ses: Δ medio +0.43  mediana por sesión +0.00  suben/bajan 13/13
+          media  mediana  suben  bajan
+scenario                              
+1          0.85     0.00      6      6
+2          0.55     0.26      6      5
+3         -0.13     0.00      1      2
+[f6] escen_ACO                      CV top3 = 0.9226  min atco 0.769  std folds 0.019

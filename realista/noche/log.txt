@@ -1,0 +1,94 @@
+[03:45:10] inicio · 16 hilos · búsqueda 2.0 h
+[03:45:10] features leídas de la caché (0s)
+[03:45:15] lab 13175 snapshots, test 1863; bloques base=88, logic=14, past=9, causal=14, geo=26, hist=18, instr=9, atencion=3
+[03:45:15] == ETAPA 1 · referencia: real_todo con 3 semillas ==
+[03:47:45] referencia: CV 0.6697 · CV 023 0.6703 · peor 0.594
+[03:47:45] == ETAPA 2 · búsqueda de parámetros (1 semilla) ==
+[03:50:00] b000: CV 0.6646 (CV 023 0.6567, peor 0.574) en 135s | mejor hasta ahora pablo_t15 0.6684
+[03:52:33] b001: CV 0.6696 (CV 023 0.6589, peor 0.608) en 153s | mejor hasta ahora b001 0.6696
+[03:55:05] b002: CV 0.6682 (CV 023 0.6633, peor 0.594) en 152s | mejor hasta ahora b001 0.6696
+[03:57:26] b003: CV 0.6643 (CV 023 0.6609, peor 0.586) en 141s | mejor hasta ahora b001 0.6696
+[03:59:45] b004: CV 0.6680 (CV 023 0.6583, peor 0.586) en 139s | mejor hasta ahora b001 0.6696
+[04:01:45] b005: CV 0.6699 (CV 023 0.6651, peor 0.586) en 120s | mejor hasta ahora b005 0.6699
+[04:03:46] b006: CV 0.6692 (CV 023 0.6583, peor 0.594) en 121s | mejor hasta ahora b005 0.6699
+[04:06:09] b007: CV 0.6654 (CV 023 0.6543, peor 0.580) en 143s | mejor hasta ahora b005 0.6699
+[04:08:29] b008: CV 0.6688 (CV 023 0.6609, peor 0.597) en 140s | mejor hasta ahora b005 0.6699
+[04:10:51] b009: CV 0.6676 (CV 023 0.6580, peor 0.597) en 142s | mejor hasta ahora b005 0.6699
+[04:13:03] b010: CV 0.6600 (CV 023 0.6506, peor 0.591) en 132s | mejor hasta ahora b005 0.6699
+[04:15:04] b011: CV 0.6695 (CV 023 0.6637, peor 0.600) en 121s | mejor hasta ahora b005 0.6699
+[04:17:04] b012: CV 0.6711 (CV 023 0.6624, peor 0.603) en 120s | mejor hasta ahora b012 0.6711
+[04:18:47] b013: CV 0.6718 (CV 023 0.6615, peor 0.597) en 103s | mejor hasta ahora b013 0.6718
+[04:20:47] b014: CV 0.6671 (CV 023 0.6554, peor 0.591) en 121s | mejor hasta ahora b013 0.6718
+[04:22:28] b015: CV 0.6669 (CV 023 0.6596, peor 0.589) en 100s | mejor hasta ahora b013 0.6718
+[04:24:51] b016: CV 0.6659 (CV 023 0.6572, peor 0.594) en 144s | mejor hasta ahora b013 0.6718
+[04:27:31] b017: CV 0.6637 (CV 023 0.6578, peor 0.583) en 159s | mejor hasta ahora b013 0.6718
+[04:29:36] b018: CV 0.6703 (CV 023 0.6574, peor 0.611) en 125s | mejor hasta ahora b013 0.6718
+[04:31:14] b019: CV 0.6641 (CV 023 0.6580, peor 0.589) en 98s | mejor hasta ahora b013 0.6718
+[04:32:54] b020: CV 0.6663 (CV 023 0.6598, peor 0.603) en 100s | mejor hasta ahora b013 0.6718
+[04:34:59] b021: CV 0.6669 (CV 023 0.6569, peor 0.583) en 125s | mejor hasta ahora b013 0.6718
+[04:36:56] b022: CV 0.6668 (CV 023 0.6583, peor 0.596) en 116s | mejor hasta ahora b013 0.6718
+[04:39:58] b023: CV 0.6673 (CV 023 0.6602, peor 0.586) en 182s | mejor hasta ahora b013 0.6718
+[04:42:25] b024: CV 0.6629 (CV 023 0.6613, peor 0.600) en 147s | mejor hasta ahora b013 0.6718
+[04:44:15] b025: CV 0.6704 (CV 023 0.6626, peor 0.600) en 110s | mejor hasta ahora b013 0.6718
+[04:45:44] b026: CV 0.6660 (CV 023 0.6587, peor 0.594) en 88s | mejor hasta ahora b013 0.6718
+[04:47:49] b027: CV 0.6685 (CV 023 0.6618, peor 0.589) en 125s | mejor hasta ahora b013 0.6718
+[04:49:33] b028: CV 0.6664 (CV 023 0.6611, peor 0.596) en 105s | mejor hasta ahora b013 0.6718
+[04:51:32] b029: CV 0.6650 (CV 023 0.6572, peor 0.586) en 119s | mejor hasta ahora b013 0.6718
+[04:53:20] b030: CV 0.6748 (CV 023 0.6703, peor 0.594) en 108s | mejor hasta ahora b030 0.6748
+[04:55:11] b031: CV 0.6669 (CV 023 0.6613, peor 0.583) en 111s | mejor hasta ahora b030 0.6748
+[04:57:04] b032: CV 0.6673 (CV 023 0.6602, peor 0.589) en 113s | mejor hasta ahora b030 0.6748
+[04:59:11] b033: CV 0.6670 (CV 023 0.6558, peor 0.583) en 127s | mejor hasta ahora b030 0.6748
+[05:00:52] b034: CV 0.6710 (CV 023 0.6694, peor 0.585) en 102s | mejor hasta ahora b030 0.6748
+[05:02:28] b035: CV 0.6713 (CV 023 0.6664, peor 0.589) en 96s | mejor hasta ahora b030 0.6748
+[05:03:33] b036: CV 0.6682 (CV 023 0.6664, peor 0.590) en 65s | mejor hasta ahora b030 0.6748
+[05:04:59] b037: CV 0.6663 (CV 023 0.6622, peor 0.600) en 86s | mejor hasta ahora b030 0.6748
+[05:06:42] b038: CV 0.6691 (CV 023 0.6655, peor 0.592) en 103s | mejor hasta ahora b030 0.6748
+[05:08:44] b039: CV 0.6691 (CV 023 0.6615, peor 0.606) en 122s | mejor hasta ahora b030 0.6748
+[05:09:50] b040: CV 0.6649 (CV 023 0.6615, peor 0.596) en 66s | mejor hasta ahora b030 0.6748
+[05:11:49] b041: CV 0.6657 (CV 023 0.6554, peor 0.596) en 119s | mejor hasta ahora b030 0.6748
+[05:13:35] b042: CV 0.6682 (CV 023 0.6602, peor 0.593) en 106s | mejor hasta ahora b030 0.6748
+[05:15:19] b043: CV 0.6704 (CV 023 0.6692, peor 0.596) en 104s | mejor hasta ahora b030 0.6748
+[05:16:57] b044: CV 0.6676 (CV 023 0.6624, peor 0.588) en 99s | mejor hasta ahora b030 0.6748
+[05:18:19] b045: CV 0.6721 (CV 023 0.6697, peor 0.602) en 82s | mejor hasta ahora b030 0.6748
+[05:20:03] b046: CV 0.6660 (CV 023 0.6607, peor 0.580) en 103s | mejor hasta ahora b030 0.6748
+[05:22:42] b047: CV 0.6695 (CV 023 0.6644, peor 0.601) en 159s | mejor hasta ahora b030 0.6748
+[05:24:28] b048: CV 0.6706 (CV 023 0.6681, peor 0.595) en 106s | mejor hasta ahora b030 0.6748
+[05:26:16] b049: CV 0.6650 (CV 023 0.6602, peor 0.593) en 108s | mejor hasta ahora b030 0.6748
+[05:28:00] b050: CV 0.6678 (CV 023 0.6642, peor 0.607) en 104s | mejor hasta ahora b030 0.6748
+[05:29:48] b051: CV 0.6699 (CV 023 0.6666, peor 0.599) en 108s | mejor hasta ahora b030 0.6748
+[05:31:19] b052: CV 0.6663 (CV 023 0.6574, peor 0.583) en 91s | mejor hasta ahora b030 0.6748
+[05:33:11] b053: CV 0.6681 (CV 023 0.6635, peor 0.603) en 112s | mejor hasta ahora b030 0.6748
+[05:34:53] b054: CV 0.6597 (CV 023 0.6569, peor 0.577) en 103s | mejor hasta ahora b030 0.6748
+[05:36:47] b055: CV 0.6669 (CV 023 0.6578, peor 0.591) en 113s | mejor hasta ahora b030 0.6748
+[05:37:51] b056: CV 0.6733 (CV 023 0.6692, peor 0.599) en 64s | mejor hasta ahora b030 0.6748
+[05:39:25] b057: CV 0.6705 (CV 023 0.6602, peor 0.602) en 94s | mejor hasta ahora b030 0.6748
+[05:41:07] b058: CV 0.6646 (CV 023 0.6563, peor 0.586) en 103s | mejor hasta ahora b030 0.6748
+[05:43:03] b059: CV 0.6728 (CV 023 0.6710, peor 0.591) en 115s | mejor hasta ahora b030 0.6748
+[05:45:13] b060: CV 0.6717 (CV 023 0.6703, peor 0.593) en 130s | mejor hasta ahora b030 0.6748
+[05:47:10] b061: CV 0.6678 (CV 023 0.6635, peor 0.600) en 117s | mejor hasta ahora b030 0.6748
+[05:48:22] b062: CV 0.6717 (CV 023 0.6615, peor 0.604) en 72s | mejor hasta ahora b030 0.6748
+[05:48:22] == ETAPA 3 · confirmar las mejores con 3 semillas ==
+[05:51:51] b030: 1 semilla 0.6748 -> 3 semillas 0.6731 (Δ vs ref +0.0034, sesiones 19/13, CV 023 0.6675) en 210s
+[05:53:54] b056: 1 semilla 0.6733 -> 3 semillas 0.6721 (Δ vs ref +0.0024, sesiones 18/15, CV 023 0.6690) en 122s
+[05:57:19] b059: 1 semilla 0.6728 -> 3 semillas 0.6717 (Δ vs ref +0.0020, sesiones 19/17, CV 023 0.6699) en 205s
+[06:00:46] b045: 1 semilla 0.6721 -> 3 semillas 0.6732 (Δ vs ref +0.0036, sesiones 18/15, CV 023 0.6719) en 207s
+[06:05:12] b013: 1 semilla 0.6718 -> 3 semillas 0.6683 (Δ vs ref -0.0014, sesiones 16/19, CV 023 0.6602) en 266s
+[06:10:23] b060: 1 semilla 0.6717 -> 3 semillas 0.6714 (Δ vs ref +0.0017, sesiones 17/17, CV 023 0.6673) en 311s
+[06:10:23] == ETAPA 4 · mezclas de las mejores configuraciones ==
+[06:10:25] mezcla top-2: CV 0.6737 (Δ +0.0040, sesiones 17/16)
+[06:10:27] mezcla top-3: CV 0.6740 (Δ +0.0043, sesiones 18/17)
+[06:10:29] mezcla top-4: CV 0.6734 (Δ +0.0037, sesiones 19/15)
+[06:10:31] mezcla top-5: CV 0.6742 (Δ +0.0046, sesiones 18/15)
+[06:10:31] elegida: mezcla_top5
+[06:10:31] == ETAPA 5 · extras sobre la mejor configuración (2 semillas) ==
+[06:14:40] b045+hist: CV 0.6676 (Δ -0.0059, sesiones 11/19)
+[06:18:49] b045+instr_atencion: CV 0.6681 (Δ -0.0055, sesiones 9/21)
+[06:23:10] b045+peso_tramo: CV 0.6711 (Δ -0.0024, sesiones 17/18)
+[06:23:10] == ETAPA 6 · versión final ==
+[06:26:27] final b045: 4 semillas en 197s
+[06:29:49] final b030: 4 semillas en 202s
+[06:31:46] final b056: 4 semillas en 117s
+[06:35:05] final b059: 4 semillas en 199s
+[06:38:33] final b060: 4 semillas en 208s
+[06:39:02] FINAL real_adri_noche: CV 0.6732 · + segundo paso 0.6722 · submission válida: True
+[06:39:02] TERMINADO en 2.9 h. Informe: C:\Users\kolir\Desktop\uni\FlowDataLab\realista\noche\INFORME.md

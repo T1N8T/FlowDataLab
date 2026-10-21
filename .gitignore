@@ -45,3 +45,23 @@ desktop.ini
 *.swp
 
 *.pdf
+# Búsqueda nocturna del modelo realista (Adri): caché de features y semillas intermedias, muy pesadas
+realista/noche/cache_features.pkl
+realista/noche*/oof/
+realista/noche*/pred/
+realista/noche_prueba/
+realista/__pycache__/
+experiments/.lgb_real_runs.lock
+
+# salidas de experimentos de futuro/pruebas: solo se versionan las de los envíos (añadir con git add -f si hace falta otra)
+futuro/pruebas/oof/*
+futuro/pruebas/preds/*
+futuro/pruebas/submissions/*
+!futuro/pruebas/*/f10_instr_l63_s10*.csv
+!futuro/pruebas/*/f10_instr_l63_or_s10*.csv
+!futuro/pruebas/*/suav_lgb_future_clear10_ses.csv
+!futuro/pruebas/*/suav_lgb_future_clear10_orcoord_ses.csv
+!futuro/pruebas/submissions/sub_f10_instr_l63*_s10_ses.csv
+futuro/pruebas/logs/
+futuro/oof/sub_*_validation.csv
+*.lock

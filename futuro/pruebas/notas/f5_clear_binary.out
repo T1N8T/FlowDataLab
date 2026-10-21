@@ -1,0 +1,2 @@
+[f5_clear_et] f5_clear_binary                CV top3 = 0.9044  min atco 0.754  std folds 0.022
+f5_clear_binary: CV 0.9044 (700s) base+logic+past+future+clear {'objective': 'binary'}

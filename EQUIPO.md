@@ -1,162 +1,113 @@
-# FlowDataLab – Plan de equipo (AWARE Prioritisation Challenge, Engage 2 Zagreb)
+# FlowDataLab – Estado del proyecto (AWARE Prioritisation Challenge, Engage 2 Zagreb)
 
-> **Cómo usar este archivo con tu IA (Claude, Gemini, etc.):** pégale este archivo entero (o el repo) y dile:
-> *"Soy <tu nombre>. Lee EQUIPO.md y ayúdame con mi parte."*
-> La IA debe ceñirse a tu sección y respetar las **reglas comunes**.
+Equipo: Pablo, Adri, Juanma y Pau. Ya no hay reparto fijo de tareas: cualquiera puede trabajar en cualquier parte siguiendo las
+**normas de trabajo** (sección 4). Este archivo es el punto de partida; el resumen razonado y ejecutable está en
+**`notebooks/00_destilado.ipynb`**.
 
-## Quién es quién
-
-| Persona | Rol | Recursos | IA |
-|---|---|---|---|
-| **Pablo** | **A** · Redes neuronales | RTX 3060 | Claude |
-| **Adri** (Adrián) | **B** · GBM + `features.py` (modelo de referencia) | RTX 3050 | Claude |
-| **Juanma** | **C** · Folds/métrica, modelos alternativos, stacking y envíos | GTX 1650 (trabaja en CPU) | Claude |
-| **Pau** | **D** · EDA, análisis de errores, barridos de parámetros, slides | Sin GPU | Gemini Pro |
-
-Todos pueden usar las máquinas del DSIC-UPV para lanzar lo pesado: bluenote.dsic.upv.es (2× RTX 4000 Ada) y gpu.dsic.upv.es (2× Quadro RTX 5000).
+Kaggle cierra el **miércoles 21/10 a las 13:00** (hora de Zagreb). 5 envíos al día (el día empieza a las 02:00). Al cierre se marcan
+**2 entregas** y el privado se puntúa con la mejor de las dos.
 
 ---
 
 ## 1. El reto en 1 minuto
-- Datos de simulador de control aéreo (sector sueco ESMM_23). El sistema AWARE genera cada 3 s la lista de tareas abiertas del controlador.
-- **Una muestra** (`sample_id`) es un snapshot de esa lista, con 9–59 tareas (~36 de media). **Una fila** es una tarea.
-- Exactamente una fila por muestra tiene `target_index = 1`: la tarea en la que trabaja el controlador.
-- **Predicción:** los 3 `row_index` más probables por muestra, el mejor primero.
-- **Métrica:** top-3 hit rate, es decir, la fracción de muestras en las que la tarea correcta está entre las 3 propuestas. Aleatorio = 0.094, baseline oficial = 0.352.
-- **Datos:** `train.csv` (11,923 muestras), `validation.csv` (1,252), `test.csv` (1,863, sin etiqueta).
-- **Leaderboard público:** solo el controlador 020. **Privado (el que decide):** el controlador 023. Ninguno de los dos está en train.
-- **Kaggle:** 5 envíos al día por equipo (el día empieza a las 02:00 de Zagreb). Cierre: **miércoles 21/10 a las 13:00**. Al final se eligen 2 entregas.
-- Descripción de columnas: `Context/Data.txt`. Descripción del reto: `Context/Overview.txt`.
+- Cada `sample_id` es un **snapshot** de la lista de tareas abiertas del controlador aéreo (9–59 tareas, ~36). Cada fila es una tarea;
+  exactamente una tiene `target_index = 1` (la tarea en la que trabaja). Se predicen los 3 `row_index` más probables.
+- **Métrica:** top-3 hit rate (azar 0.094, `sample_submission` 0.352).
+- **Público:** controlador 020 (2 sesiones, 915 snapshots). **Privado, el que decide:** controlador 023 (3 sesiones, 948).
+- **Información permitida:** el organizador confirmó (21/10, 03:15) que se puede usar **cualquier información de los datasets**,
+  incluidos los snapshots futuros y pasados de la sesión y las etiquetas de otras sesiones de train/validation (el "oráculo").
+- Columnas: `Context/Data.txt`. Reto: `Context/Overview.txt`.
 
-### Conceptos clave de los datos
-- **14 tipos de tarea** (`task_index`), por ejemplo: 4 = assume_aircraft (aceptar el avión), 5 = transfer_aircraft (pasarlo al siguiente sector), 12 = zone_conflict (zona militar), 2 = entry_coordination. Es una **categoría**, no un número.
-- La mayoría de columnas describen **el avión**, no la tarea, así que son iguales en todas las tareas de un mismo avión. Lo que las distingue: `task_index`, `x_task_age` y las columnas `l_*`.
-- **Caso difícil:** un mismo avión con assume_aircraft y entry_coordination a la vez (`l_twin_AE = 1`). El controlador elige assume en unas 3 de cada 4 veces.
-- **Celda vacía = "no aplica"**, nunca 0.
-- Las etiquetas tienen ruido y los controladores no coinciden mucho entre sí: el techo está bastante por debajo de 1.
-- Respuestas por tipo en train: transfer 27 %, assume 26 %, zone_conflict 16 %, entry_coordination 8 %, return_to_route 7 %, exit_coordination 6 %.
+## 2. Lo que sabemos (no repetir)
+Cifras: CV top-3 con `Data/folds.csv` (5 folds por controlador). Detalle en `notebooks/00_destilado.ipynb` y `futuro/LGB_futuro.ipynb`.
 
----
+| Paso | CV | Público |
+|---|---|---|
+| Línea limpia: solo el propio snapshot (`lgb_adri_v2`) | 0.664 | 0.642 |
+| + snapshots **pasados** (`realista/`, `real_adri_noche_ses`) | 0.672 | — |
+| + snapshots **futuros** (`lgb_future`: siguiente instrucción al avión, desaparición de la tarea) | 0.901 | 0.942 |
+| + `clear` + segundo paso de sesión + 10 semillas + suavizado = **A** | 0.918 | 0.947 |
+| + bloque `instr` + 63 hojas + `extra_trees` = **N** | 0.924 | **0.951** |
+| A + oráculo de coordinaciones = **B** | 0.925 | 0.934 |
+| N + oráculo de coordinaciones = **NOR** / **C** | 0.928 | 0.948 |
+| **M30_30** = 0.7·C30 + 0.3·N30 (mezcla de probabilidades, peso por CV anidada) | **0.929** | — |
 
-## 2. Reglas comunes (OBLIGATORIAS para todos y para todas las IAs)
-1. **Cada snapshot se predice solo con sus propias filas** (las del mismo `sample_id`). Prohibido usar otros snapshots de la sesión, pasados o futuros, por ahora: nada de features temporales ni de suavizado entre snapshots. El organizador nos ha pedido primero la mejor nota así; si luego lo permite, se avisará.
-2. **Validación:** GroupKFold de 5 folds por `atco`, siempre con `Data/folds.csv` (columnas `atco,fold`). Nunca un split aleatorio por filas o muestras.
-3. **Se decide por la CV**, no por el leaderboard público.
-4. **Columnas que no son features:** `sample_id`, `target_index`, `session`, `atco`, `scenario`, `timestamp`, `task_name`. `row_index` solo si el EDA demuestra que aporta.
-5. Se entrena con `train.csv` + `validation.csv` juntos.
-6. **Nadie sube a Kaggle salvo Juanma.**
-7. Los modelos con snapshots futuros/pasados viven en `futuro/` (ver `futuro/README.md`) y guardan en `futuro/oof|preds|submissions`; `stacking/stack.py` solo los usa con `--futuro`. No tocar `oof/`/`preds/` con ellos.
+**Por qué funciona:**
+- **El futuro lo es casi todo** (+24 puntos; el pasado da ~1.5). La regla que aprende el modelo: el avión que recibe una instrucción
+  en los próximos 10 s es el que se está trabajando.
+- **Estructura de las etiquetas:** dentro de una racha el controlador repite la tarea (94.8 %); tras un hueco, casi nunca (0.2 %);
+  cada tarea se trabaja en una sola racha (98.4 %). El **segundo paso de sesión** (`futuro/feat_session.py`) lo aprovecha (+0.7).
+- **`clear`** (cuándo cambia el nivel, rumbo, zona o ruta del avión, +0.6) e **`instr`** (qué tipo de instrucción llega y si encaja
+  con la tarea; solo funciona con 63 hojas + `extra_trees`, +0.6).
+- **El oráculo** (qué tareas trabajan otros controladores del mismo escenario) es la única información entre sesiones: entre
+  sesiones se transmite *si* una tarea se trabaja, no *cuándo*.
 
-### Formato común de salidas (para poder combinar modelos)
-Cada modelo genera tres archivos:
-- `oof/<modelo>.csv`: predicciones out-of-fold sobre train+validation, con columnas `sample_id,row_index,score` (score alto = más probable).
-- `preds/<modelo>.csv`: predicciones de test con el modelo entrenado con todo, mismo formato.
-- `submissions/sub_<modelo>.csv`: columnas `sample_id,prediction`, con 3 `row_index` separados por espacios.
+**Dónde está el techo:**
+- La mitad de los fallos son **coordinaciones** (no dejan huella: coordinar no es una instrucción al avión). El 41 % de los fallos
+  acierta el avión pero no la tarea. Los fallos son de tramo entero (~80 %): ningún post-proceso en la racha los arregla.
+- Ante la misma situación, dos controladores eligen la misma tarea solo el **12.7 %** de las veces.
+- El controlador pesa más que el modelo: en el privado se espera **~0.91–0.92** (±5 por el propio 023); las diferencias entre
+  modelos son de ±0.5.
+- **El oráculo en el público:** los envíos con oráculo sobre A bajaron (B 0.934). Sobre N aguanta mejor (NOR 0.948). La CV puede
+  sobreestimar el oráculo en un controlador nuevo; el 023 coordina poco, así que debería afectarle menos.
 
-Cada script imprime su **CV top-3** usando `cv/metric.py`. Se guarda el OOF aunque el modelo sea peor, porque en el stacking puede sumar.
+**No funciona (ya probado; ver la sección 5 del notebook destilado y las secciones 2–24 de `LGB_futuro.ipynb`):** otros modelos
+(XGBoost, CatBoost, red), stacks sin oráculo, ajuste de parámetros alrededor de N, bloques `coord`/`block`/`rel`/`geo`, post-procesos
+en la racha (HMM, Kalman, modelo por racha, transiciones), variantes del segundo paso, adaptación al controlador (EM, covariate
+shift, Bayes jerárquico, estilo), especialistas por tipo, pseudo-etiquetas, etiquetas graduadas, bagging por controladores,
+oráculo recortado (solo exit o solo sin huella), más de ~20 semillas.
 
-### Estructura del repo
+## 3. Entregas
+| Envío | Archivo | CV | Público |
+|---|---|---|---|
+| **M30_30** (con oráculo) | `futuro/pruebas/submissions/sub_f11_M30_30.csv` | 0.929 | — |
+| **N** (sin oráculo) | `futuro/pruebas/submissions/sub_f10_instr_l63_s10_ses.csv` | 0.924 | 0.951 |
+| NOR (con oráculo) | `futuro/pruebas/submissions/sub_f10_instr_l63_or_s10_ses.csv` | 0.928 | 0.948 |
+| A | `futuro/submissions/sub_suav_lgb_future_clear10_ses.csv` | 0.918 | 0.947 |
+| B | `futuro/submissions/sub_suav_lgb_future_clear10_orcoord_ses.csv` | 0.925 | 0.934 |
+| Limpia (solo el snapshot) | `submissions/sub_lgb_adri_v2.csv` | 0.664 | 0.642 |
+
+**Pareja final recomendada: M30_30 + N** (una con oráculo y otra sin él; `LGB_futuro.ipynb`, 24l). Si el oráculo transfiere al
+023 como dice la CV, cuenta M30; si falla como en el 020, cuenta N. Dos con oráculo (M30 + B) ganan algo más en la simulación, pero
+no cubren ese fallo.
+
+## 4. Normas de trabajo
+1. **Validación:** siempre `Data/folds.csv` (GroupKFold por controlador). Nunca splits aleatorios por filas o snapshots.
+2. **Se decide por la CV, no por el público** (son 2 sesiones de otro controlador; ±1–2 puntos de ruido).
+3. **Criterio de adopción:** un cambio entra si mejora la media **y** la mediana por sesión, sube en más sesiones/controladores de los
+   que baja y no hunde al peor controlador. Herramienta: `python futuro/pruebas/comparar.py <ref> <cand>`. Mirar también la "CV 023"
+   (controladores 002, 011, 010, 006, 017, 015, los más parecidos al 023).
+4. **Ruido:** con 1 semilla, menos de 0.005 es ruido; con 3 semillas, ±0.2. Comparar siempre con la referencia **con las mismas
+   semillas**; confirmar con 10 antes de adoptar.
+5. **Sin fuga:** lo que use etiquetas, solo de los folds de entrenamiento (el oráculo, por fold: `m_lgb_future.oracle_data`). Los
+   parámetros de post-procesos y mezclas, con **CV anidada** (4 folds → 5º). Las cifras elegidas mirando todo el OOF son optimistas.
+6. **Formato de salidas:** `oof/<m>.csv` y `preds/<m>.csv` con `sample_id,row_index,score` (score alto = más probable) y
+   `submissions/sub_<m>.csv` con `sample_id,prediction` (3 `row_index` separados por espacios). Cada línea guarda en su carpeta:
+   `oof|preds|submissions` (limpia), `realista/…`, `futuro/…` y `futuro/pruebas/…`.
+7. **Registro:** cada ejecución se apunta (`registrar()` de `futuro/pruebas/base_fut.py` → `futuro/pruebas/resultados.jsonl`;
+   `m_lgb_future.py` → `experiments/lgb_future_runs.csv`) y cada conclusión en el notebook de su línea.
+8. **Git:** se trabaja en `main` (o en una rama y merge). Las salidas de experimentos de `futuro/pruebas/` no se versionan (están en
+   `.gitignore`), salvo las de los envíos: añadir con `git add -f` solo lo que alimente una entrega. Los CSV que sobran se archivan
+   fuera del repo.
+9. **Kaggle:** antes de subir, avisar al equipo (5 envíos al día compartidos) y apuntar la nota en la tabla de la sección 3.
+
+## 5. Estructura del repo
 ```
-Data/          train/validation/test.csv, folds.csv, scorer.py   (CSV no versionados)
-cv/metric.py                    ← Juanma (C) · top-3, report(), save_outputs()
-src/
-  folds.py                      ← Juanma (C) · genera Data/folds.csv
-  features.py                   ← Adri (B) · features del snapshot (logic_*) -> models/features.parquet
-  m_clogit.py                   ← Juanma (C) · logit condicional sobre logic_* (analítico)
-  m_nn.py, nn_sweep.py          ← Pablo (A) · transformer de snapshot y barridos
-hierarchical/m_types.py         ← Juanma (C) · P(tipo) × P(tarea | tipo)
-linear/m_linear.py              ← Juanma (C) · logit condicional con todas las columnas y pendiente por tipo
-stacking/stack.py               ← Juanma (C) · media ponderada y meta-ranker sobre oof/
-notebooks/     01_eda.ipynb, LGB_adri.ipynb (LightGBM), NN_pablo.ipynb
-experiments/   registro de ejecuciones (lgb_runs.csv, nn_runs.csv)
-oof/ preds/ submissions/   salidas en formato común (no versionadas)
+Data/                 train/validation/test.csv (no versionados), folds.csv, scorer.py, sample_submission.csv
+cv/metric.py          métrica top-3, report(), save_outputs(), to_submission()
+src/                  línea limpia: features.py (logic_*), m_clogit.py, m_nn.py (transformer), nn_sweep.py, folds.py
+linear/, hierarchical/  logit condicional y P(tipo)×P(tarea|tipo) (también con --future)
+stacking/stack.py     media ponderada con CV anidada y meta-ranker (--futuro para la línea futuro)
+pruebas/              hilos h1–h5 de la línea limpia; base.py lo usa futuro/pruebas/base_fut.py
+notebooks/            00_destilado (resumen), 01_eda, LGB_adri (línea limpia), NN_pablo, panel_modelos
+realista/             snapshot + pasado (sin futuro): features_real.py, feat_causal.py, m_lgb_real.py, LGB_realista.ipynb
+futuro/               línea con futuro:
+  features_future.py    bloques base/logic/past/future y los feat_*.py (clear, coord, block, rel, geo)
+  feat_session.py       segundo paso de sesión · feat_oracle.py oráculo · metricas.py métricas robustas
+  m_lgb_future.py       LightGBM por bloques (--sesion, --oraculo) · m_gbm_future.py, m_nn_future.py
+  LGB_futuro.ipynb      diario completo de la línea (secciones 0–24)
+  pruebas/              base_fut.py, suavizado.py, comparar.py, f5_stack.py (sesión/suavizado/stack),
+                        f10_instr.py (N, NOR), f11_lab.py + f11_mezcla.py (C, M30, banco de Pablo), diagnósticos f8/f9,
+                        resultados.jsonl
+experiments/          registros de ejecuciones (lgb_runs, nn_runs, lgb_future_runs, gbm_future_runs, lgb_real_runs)
 ```
-Pendiente: XGBoost / CatBoost (Adri) y dos etapas avión → tarea (Juanma).
-Cada persona trabaja en su rama de git. Los CSV pesados se comparten por carpeta compartida, no por git.
-
-### Resultados conocidos
-- LightGBM LambdaRank con las columnas originales: **CV 0.655**.
-- Rankings relativos simples dentro del snapshot: 0.652 (sin mejora todavía; hay que trabajar mejor esas features).
-- Con snapshots futuros: 0.83, **no permitido por ahora**.
-
----
-
-## 3. Tareas por persona
-
-### Pablo · A · Redes neuronales (RTX 3060)
-1. `src/m_nn.py`: transformer sobre el conjunto de tareas del snapshot.
-   - Entrada: features numéricas (log + estandarizar, vacío → 0 + indicador de vacío) y un embedding de `task_index`.
-   - Encoder sin codificación de posición (2–3 capas, d = 64, 4 cabezas, dropout 0.2) y una puntuación por tarea con máscara de padding.
-   - Softmax sobre la lista + cross-entropy con label smoothing 0.1.
-   - Early stopping con 3 controladores apartados dentro de cada fold. Media de 3 semillas.
-2. Afinar tamaño, dropout, label smoothing y learning rate, una cosa cada vez.
-3. Variante: usar la puntuación OOF del LightGBM de Adri como entrada extra.
-4. Si se permiten otros snapshots: una versión que vea también la lista anterior y la siguiente.
-- **Entregables:** `oof/nn_*.csv` y `preds/nn_*.csv`.
-- **Punto de decisión a las 21:00:** si la CV queda a más de ~3 puntos del GBM, se queda como modelo secundario del ensemble y Pablo pasa a ayudar a Adri con features.
-- **Miércoles:** apoyo a Pau con las slides (parte técnica).
-
-### Adri · B · GBM y features (RTX 3050) — el núcleo
-1. `src/features.py` (todos lo importan). Funciones `add_features(df)` y `feature_cols(df)`. Ideas por orden:
-   - Rankings y diferencias respecto al mínimo **dentro del snapshot** de `a_since_flight`, `x_task_age`, `x_state_age`, `time_to_MD`, `k_timeToExitPoint`, `distance_to_zone` y `|time_to_sector|`.
-   - Los mismos rankings **dentro del mismo tipo** de tarea.
-   - Por avión: nº de tareas del avión y si esta tarea es la más antigua del avión.
-   - Tipo × estado: assume y `x_transfer_in`, transfer y `k_aircraftNeedsToBeTransferred`, entry_coordination y `x_isc_coordinated`, zone y `distance_to_zone`.
-   - Contexto del snapshot: nº de aviones y nº de transfers, assumes y zonas pendientes.
-   - Añadir las ideas que lleguen de Pau.
-2. `src/m_lgb.py`: LightGBM LambdaRank (modelo de referencia). Parámetros base: `n_estimators=400`, `learning_rate=0.05`, `num_leaves=31`, `min_child_samples=50`, `subsample=0.8`, `colsample_bytree=0.7`, `lambdarank_truncation_level=5` y `task_index` como categórica.
-3. `src/m_xgb.py`: XGBoost `rank:pairwise` o `rank:ndcg` con `device='cuda'`.
-4. `src/m_cat.py`: CatBoost `YetiRank` con `task_type='GPU'`.
-5. Varias semillas de cada modelo.
-- **Entregables:** `oof/` y `preds/` de lgb, xgb y cat. Push de `features.py` cada vez que la CV mejore.
-- **Regla:** una feature solo entra si mejora la CV del LightGBM.
-
-### Juanma · C · Infraestructura, modelos alternativos, stacking y envíos (CPU)
-1. **Lo primero (antes de las 17:15):** `src/folds.py`, que genera `Data/folds.csv` asignando cada `atco` a un fold 0–4 de forma estable, y `src/metric.py`, con una función de top-3 a partir de un df `sample_id,row_index,score` y las etiquetas. Pasarlos a todos.
-2. `src/m_types.py`: especialistas por tipo. Un modelo de P(tipo | snapshot) con features agregadas de la lista y un ranker dentro de cada tipo; puntuación = P(tipo) × P(tarea | tipo).
-3. `src/m_two_stage.py`: primero ranking de **aviones** (una fila por avión) y luego la tarea dentro del avión (sobre todo assume vs entry_coordination). Cuando duda entre el gemelo, repartir el top-3 en consecuencia.
-4. `src/stack.py`:
-   - (a) Promedio ponderado de rankings dentro del snapshot, con pesos ajustados en la CV.
-   - (b) Meta-modelo LightGBM ranker pequeño con los scores OOF de todos, su ranking dentro del snapshot, `task_index`, `l_twin_AE` y `seq_len`.
-   - Usar **solo OOF** para entrenar el nivel 2.
-5. **Envíos a Kaggle:** solo Juanma. Primer stacking antes de las 23:00; a las 02:00 se renuevan los envíos.
-- **Entregables:** `Data/folds.csv`, `metric.py`, OOF/preds de types y two-stage, y las submissions finales.
-
-### Pau · D · EDA, análisis de errores, barridos y slides (sin GPU, Gemini Pro)
-1. **17:00–18:30 · `notebooks/EDA_pau.ipynb`:**
-   - Estructura: tareas por snapshot, aviones por snapshot, tareas por avión. Comprobar que hay exactamente un `target_index = 1` por muestra.
-   - ¿`row_index` aporta? Posición de la respuesta en la lista.
-   - "Lift" de cada tipo: % como respuesta frente a % en la lista, y si cambia por escenario.
-   - Para transfer, assume y zone_conflict: la tarea correcta frente a las demás del mismo tipo en el mismo snapshot, en `time_to_sector`, `x_task_age`, `x_state_age`, `a_since_flight` y flags (`x_transfer_in`, `k_aircraftNeedsToBeTransferred`).
-   - Columnas vacías: cuáles, cuándo, y si estar vacía da información.
-   - **Salida:** 3–5 ideas de features concretas, que se pasan a Adri.
-2. **Desde las 19:00 · `notebooks/errores_pau.ipynb`** sobre `oof/lgb_rank.csv`:
-   - Acierto por tipo de tarea correcta, por controlador, por longitud de lista y en snapshots con gemelo (`l_twin_AE`).
-   - Ejemplos de fallos: qué tipo había en el top-3 y cuál era el correcto.
-   - **Salida:** dónde atacar, que se pasa a Adri y Juanma.
-3. **Barridos de parámetros** de `m_lgb.py` en CPU (`num_leaves` 15/31/63, `learning_rate` 0.03/0.05/0.1, `n_estimators` 300/600/1000, `min_child_samples` 20/50/100), uno cada vez.
-4. **`RESULTADOS.md`:** tabla con fecha/hora, persona, modelo, cambio, CV top-3 y nota en el leaderboard público (si se subió).
-5. **Miércoles desde las 10:00 · slides para el jurado:** el problema, por qué validamos por controlador, qué features funcionan, los modelos y el ensemble, el resultado y una versión desplegable en tiempo real.
-
----
-
-## 4. Calendario
-| Hora | Qué |
-|---|---|
-| 16:55–17:15 | Juanma: `folds.py` + `metric.py`. Adri: primera versión de `features.py` |
-| 17:15–19:00 | Primera versión de cada modelo con su OOF. Pau: EDA |
-| **19:00** | **Puesta en común (15 min):** CV de cada uno e ideas de features |
-| 19:00–23:00 | Iterar. Pau: análisis de errores y barridos |
-| **23:00** | **Primer stacking** (Juanma) |
-| 02:00 | Se renuevan los 5 envíos: subir el mejor stacking |
-| **Miér. 08:00** | **Puesta en común:** qué entra en el final. ¿Se permiten otros snapshots? |
-| 08:00–11:00 | Últimas mejoras y reentrenar con todo |
-| 11:00–12:30 | Elegir 2 entregas por CV (la mejor y una segura). Slides |
-| 13:00 | Cierre de Kaggle. 13:00–13:30 evaluación del jurado y 13:30–14:30 entrevistas del top-3 |
-
-## 5. Reglas para las IAs del equipo
-- Antes de proponer una feature, comprobar que solo usa filas del mismo `sample_id`.
-- Todo modelo usa `Data/folds.csv`, imprime su CV top-3 y guarda `oof/` y `preds/` en el formato común.
-- Cambios mínimos en el código de otros; si hace falta tocar `features.py`, avisar a Adri.
-- Código completo y listo para copiar.
-- No inventar resultados: si algo no se ha ejecutado, decirlo.

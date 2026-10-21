@@ -1,0 +1,3 @@
+aislada: se quitan 10 de 13175 snapshots del entrenamiento
+[f6] f6_aislada                     CV top3 = 0.9065  min atco 0.775  std folds 0.027
+[f6] f6_aislada_ses                 CV top3 = 0.9119  min atco 0.781  std folds 0.028
