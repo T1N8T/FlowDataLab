@@ -104,7 +104,7 @@ def cv(nombre, seeds=3):
     bloques, p, orac = VARIANTES[nombre]
     F = [c for b in ["base", "logic", "past", "future"] + bloques for c in fs[b]]
     seeds = tuple(range(int(seeds)))
-    P = {**PARAMS_FUT, **p, "n_jobs": 16}
+    P = {**PARAMS_FUT, **p, "n_jobs": 28}
     if orac:      # oráculo de coordinaciones de Pablo (feat_oracle vía m_lgb_future.oracle_data), calculado por fold
         import m_lgb_future as M
         O = M.oracle_data(dict(lab=lab, te=te), "coord")
