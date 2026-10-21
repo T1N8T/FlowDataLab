@@ -31,7 +31,7 @@ Cifras: CV top-3 con `Data/folds.csv` (5 folds por controlador). Detalle en `not
 | + bloque `instr` + 63 hojas + `extra_trees` = **N** | 0.924 | **0.951** |
 | A + oráculo de coordinaciones = **B** | 0.925 | 0.934 |
 | N + oráculo de coordinaciones = **NOR** / **C** | 0.928 | 0.948 |
-| **M30_30** = 0.7·C30 + 0.3·N30 (mezcla de probabilidades, peso por CV anidada) | **0.929** | — |
+| **M30_30** = 0.7·C30 + 0.3·N30 (mezcla de probabilidades, peso por CV anidada) | **0.929** | **0.953** |
 
 **Por qué funciona:**
 - **El futuro lo es casi todo** (+24 puntos; el pasado da ~1.5). La regla que aprende el modelo: el avión que recibe una instrucción
@@ -61,7 +61,7 @@ oráculo recortado (solo exit o solo sin huella), más de ~20 semillas.
 ## 3. Entregas
 | Envío | Archivo | CV | Público |
 |---|---|---|---|
-| **M30_30** (con oráculo) | `futuro/pruebas/submissions/sub_f11_M30_30.csv` | 0.929 | — |
+| **M30_30** (con oráculo) — **entrega final** | `futuro/pruebas/submissions/sub_f11_M30_30.csv` | 0.929 | **0.953** |
 | **N** (sin oráculo) | `futuro/pruebas/submissions/sub_f10_instr_l63_s10_ses.csv` | 0.924 | 0.951 |
 | NOR (con oráculo) | `futuro/pruebas/submissions/sub_f10_instr_l63_or_s10_ses.csv` | 0.928 | 0.948 |
 | A | `futuro/submissions/sub_suav_lgb_future_clear10_ses.csv` | 0.918 | 0.947 |
@@ -70,7 +70,7 @@ oráculo recortado (solo exit o solo sin huella), más de ~20 semillas.
 
 **Entrega final recomendada: `futuro/pruebas/submissions/sub_f11_M30_30.csv`** (elegida por el privado esperado, sección 6 de
 `notebooks/00_destilado.ipynb` y `futuro/pruebas/f13_eleccion.py`): +0.54 frente a N con cinco métodos distintos, la que elige la regla
-"por CV" en 16 de 18 controladores y sin pérdidas de más de 1 punto frente a N en ninguno. C30 y NOR quedan muy cerca (+0.50 / +0.49).
+"por CV" en 16 de 18 controladores y sin pérdidas de más de 1 punto frente a N en ninguno. C30 y NOR quedan muy cerca (+0.50 / +0.49). **Público: 0.953**, el mejor del equipo.
 
 ## 4. Normas de trabajo
 1. **Validación:** siempre `Data/folds.csv` (GroupKFold por controlador). Nunca splits aleatorios por filas o snapshots.

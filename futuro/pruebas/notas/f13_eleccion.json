@@ -95,8 +95,8 @@
    "delta_reponderada_vs_N": 0.628,
    "estab_023_vs_N": 0.409,
    "repite_023_vs_N": 0.0,
-   "publico": 0.949,
-   "publico_fuente": "estimado desde NOR",
+   "publico": 0.953,
+   "publico_fuente": "real",
    "delta_privado_esperado": 0.537,
    "delta_final_esperado": 0.537
   },

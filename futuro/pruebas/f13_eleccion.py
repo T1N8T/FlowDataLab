@@ -29,7 +29,7 @@ CAND = {  # nombre: (oof/preds, submission, público real o None)
     "N30": ("f11_N30_ses", "futuro/pruebas/submissions/sub_f11_N30_ses.csv", None),
     "NOR": ("f10_instr_l63_or_s10_ses", "futuro/pruebas/submissions/sub_f10_instr_l63_or_s10_ses.csv", 0.948),
     "C30": ("f11_C30_ses", "futuro/pruebas/submissions/sub_f11_C30_ses.csv", None),
-    "M30_30": ("f11_M30_30", "futuro/pruebas/submissions/sub_f11_M30_30.csv", None),
+    "M30_30": ("f11_M30_30", "futuro/pruebas/submissions/sub_f11_M30_30.csv", 0.953),
     "A": ("suav_lgb_future_clear10_ses", "futuro/submissions/sub_suav_lgb_future_clear10_ses.csv", 0.947),
     "B": ("suav_lgb_future_clear10_orcoord_ses", "futuro/submissions/sub_suav_lgb_future_clear10_orcoord_ses.csv", 0.934),
 }
