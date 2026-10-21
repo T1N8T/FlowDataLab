@@ -30,7 +30,8 @@ B045 = dict(n_estimators=756, lr=0.018642543216427748, leaves=37, min_child=25, 
             colsample=0.7720566531433419, reg_lambda=21.557215921190185, min_gain=0.0005006652310000156, max_bin=63,
             cat_smooth=1.5038235350480391, extra_trees=False, trunc=8)
 VARS = dict(b045=("lambdarank", ()), b045_bin=("binary", ()), b045_xe=("rank_xendcg", ()),
-            b045_ctx=("lambdarank", ("ctx",)))
+            b045_ctx=("lambdarank", ("ctx",)), b045_trig=("lambdarank", ("trig",)),
+            b045_bal=("lambdarank", (), "atco"))
 OUT = REAL / "claude"
 
 
@@ -54,31 +55,56 @@ def fe_ctx(d):
     return o.astype("float32")
 
 
+def fe_trig(d):
+    """Qué disparó la racha actual: tiempos relativos al primer snapshot de la racha (pasado, así que causal).
+    > 0 = ocurrió antes de que empezara la racha (segundos); < 0 = ocurrió durante la racha."""
+    o = pd.DataFrame(index=d.index)
+    tb = d.t - d.groupby("block").t.transform("min")              # segundos desde el inicio de la racha
+    o["tg_task"] = d.p_task_start - tb                              # la tarea ya estaba al empezar la racha
+    o["tg_age"] = d.x_task_age - tb
+    o["tg_cz"] = d.cz_task - tb                                     # cambio de estado justo antes de la racha
+    o["tg_act"] = d.a_since_flight - tb                             # < 0: instrucción al avión durante la racha
+    o["tg_any"] = d.a_since_any - tb
+    o["tg_gap"] = d.gap_prev.where(d.blk_pos == 0).groupby(d.block).transform("max")   # pausa antes de la racha
+    for c in ("tg_task", "tg_age", "tg_cz", "tg_act"):
+        o[c + "_rk"] = o[c].where(o[c] >= -3).groupby(d.sample_id).rank(method="min")   # el más reciente antes
+    return o.astype("float32")
+
+
 def setup(hilos):
     N.A = types.SimpleNamespace(prueba=False)
     N.OUT, N.THREADS = OUT, hilos
     for s in ("", "oof", "pred"):
         (OUT / s).mkdir(exist_ok=True, parents=True)
     lab, te, fs = N.datos()
-    a, b = fe_ctx(lab), fe_ctx(te)
-    for c in a.columns:
-        lab[c], te[c] = a[c].values, b[c].values
-    fs["ctx"] = list(a.columns)
+    for nombre, fn in (("ctx", fe_ctx), ("trig", fe_trig)):
+        a, b = fn(lab), fn(te)
+        for c in a.columns:
+            lab[c], te[c] = a[c].values, b[c].values
+        fs[nombre] = list(a.columns)
     return lab, te, fs
 
 
-def fit(A_, F, obj, seed, hilos):
+def peso_atco(A_):
+    """1/√(snapshots del controlador), media 1: los controladores pequeños pesan algo más al entrenar."""
+    n = A_.drop_duplicates("sample_id").groupby("atco").size()
+    w = 1.0 / np.sqrt(A_.atco.map(n).values)
+    return w / w.mean()
+
+
+def fit(A_, F, obj, seed, hilos, peso=None):
     p = N.lgb_params(B045)
     p.update(random_state=seed, verbose=-1, n_jobs=hilos)
+    w = peso_atco(A_) if peso == "atco" else None
     if obj == "binary":
         p.pop("lambdarank_truncation_level")
         p["objective"] = "binary"
-        return lgb.LGBMClassifier(**p).fit(A_[F], A_.target_index, categorical_feature=["task_index"])
+        return lgb.LGBMClassifier(**p).fit(A_[F], A_.target_index, sample_weight=w, categorical_feature=["task_index"])
     p["objective"] = obj
     if obj != "lambdarank":
         p.pop("lambdarank_truncation_level")
     return lgb.LGBMRanker(**p).fit(A_[F], A_.target_index, group=A_.groupby("sample_id", sort=False).size().values,
-                                   categorical_feature=["task_index"])
+                                   sample_weight=w, categorical_feature=["task_index"])
 
 
 def score(m, X):
@@ -87,7 +113,8 @@ def score(m, X):
 
 def run(var, seeds, hilos):
     lab, te, fs = setup(hilos)
-    obj, extra = VARS[var]
+    obj, extra, *peso = VARS[var]
+    peso = peso[0] if peso else None
     F = [c for b in N.FEATS + list(extra) for c in fs[b]]
     print(f"{var}: {obj}, {len(F)} features", flush=True)
     for s in range(seeds):
@@ -97,10 +124,10 @@ def run(var, seeds, hilos):
             oof = np.zeros(len(lab))
             for f in sorted(lab.fold.unique()):
                 tr, va = (lab.fold != f).values, (lab.fold == f).values
-                oof[va] = score(fit(lab[tr], F, obj, s, hilos), lab.loc[va, F])
+                oof[va] = score(fit(lab[tr], F, obj, s, hilos, peso), lab.loc[va, F])
             np.save(po, oof)
         if not pp.exists():
-            np.save(pp, score(fit(lab, F, obj, s, hilos), te[F]))
+            np.save(pp, score(fit(lab, F, obj, s, hilos, peso), te[F]))
         o = np.mean([np.load(OUT / "oof" / f"{var}__s{k}.npy") for k in range(s + 1)], axis=0)
         cv = hits(lab[["sample_id", "row_index"]].assign(score=o)).mean()
         print(f"  semilla {s}: {time.time() - t0:.0f}s · CV con {s + 1} semillas {cv:.4f}", flush=True)
@@ -147,6 +174,7 @@ def evaluar():
                 add(f"noche + {w} × {v}", z, best, n)
     r = pd.DataFrame(filas).round(4)
     print(r.to_string(index=False))
+    r.to_csv(OUT / "resultados.csv", index=False)                  # lo lee LGB_realista.ipynb
     pickle.dump(dict(kl=kl, kt=kt, best_te=best_te), open(OUT / "keys.pkl", "wb"))
     return r
 
