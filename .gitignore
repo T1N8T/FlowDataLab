@@ -65,3 +65,8 @@ futuro/pruebas/submissions/*
 futuro/pruebas/logs/
 futuro/oof/sub_*_validation.csv
 *.lock
+# pruebas de realista/claude_mejoras.py: semillas intermedias y logs
+realista/claude/oof/
+realista/claude/pred/
+realista/claude/*.log
+realista/claude/log.txt
