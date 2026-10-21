@@ -43,6 +43,9 @@ def parse(argv=None):
     ap.add_argument("--orc", action="store_true", help="oráculo de coordinaciones (feat_oracle, variante coord)")
     ap.add_argument("--orc-var", default="coord")
     ap.add_argument("--obj", default="lambdarank", help="lambdarank (N) o softmax (entropía cruzada listwise, f11)")
+    ap.add_argument("--grado-orc", type=float, default=0.0,
+                    help="relevancia 1 a las tareas que otros controladores trabajaron a ±60 s (or_near60 del oráculo "
+                         "completo >= este umbral); la respuesta propia vale 2")
     ap.add_argument("--mono", default="", help="restricciones monótonas, p. ej. 'si_match:-1,si_match_rk:-1'")
     ap.add_argument("--ls", type=float, default=0.0, help="suavizado de etiquetas del objetivo softmax")
     ap.add_argument("--weight", default="", help="peso por snapshot: atco:p (1/n_atco^p), ses:p")
@@ -136,12 +139,12 @@ def softmax_obj(y, s, w, group):
     return (g * w, h * w) if w is not None else (g, h)
 
 
-def fit(a, A, F, P, seed):
+def fit(a, A, F, P, seed, y=None):
     if a.obj == "softmax":
         P = {k: v for k, v in P.items() if k not in ("objective", "lambdarank_truncation_level")}
         P["objective"] = softmax_obj
     m = lgb.LGBMRanker(**{**P, "random_state": seed})
-    m.fit(A[F], A.target_index, group=A.groupby("sample_id", sort=False).size().values,
+    m.fit(A[F], A.target_index if y is None else y, group=A.groupby("sample_id", sort=False).size().values,
           sample_weight=weights(a, A), categorical_feature=["task_index"])
     return m
 
@@ -162,7 +165,7 @@ def medir(a, nm, lab, n_feats=None, blocks=(), seeds=(), secs=None):
         extra = {k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else int(v)) for k, v in m.items()
                  if k not in ("cv", "min_atco")}
         registrar(nm + suf, hilo="f11", descripcion=f"{a.tag} blocks={list(blocks)} params={a.params} orc={a.orc} "
-                  f"weight={a.weight} drop={a.drop} obj={a.obj} ls={a.ls} mono={a.mono} seeds={list(seeds)} ref={ref}", n_features=n_feats, segundos=secs,
+                  f"weight={a.weight} drop={a.drop} obj={a.obj} ls={a.ls} mono={a.mono} grado_orc={a.grado_orc} seeds={list(seeds)} ref={ref}", n_features=n_feats, segundos=secs,
                   extra=extra)
         res[suf] = m
     return res
@@ -184,13 +187,21 @@ def run(a):
     if a.mono:
         mc = dict((k, int(v)) for k, v in (x.split(":") for x in a.mono.split(",")))
         P["monotone_constraints"] = [mc.get(c, 0) for c in F]
+    if a.grado_orc:
+        XB, _ = orc_cache(lab, te, "base")
+
+        def ygr(version, mask):
+            near = XB[f"or_near60__{version}"].values[:len(lab)][mask]
+            t = lab.target_index.values[mask]
+            return 2 * t + ((t == 0) & (np.nan_to_num(near) >= a.grado_orc)).astype(int)
     oof = np.zeros(len(lab))
     for f in range(5):
         tr, va = (lab.fold != f).values, (lab.fold == f).values
         L = lab
         if a.orc:
             L = pd.concat([lab, pd.DataFrame({c: X[f"{c}__f{f}"].values[:len(lab)] for c in ocols})], axis=1)
-        oof[va] = np.mean([fit(a, L[tr], F, P, s).predict(L.loc[va, F]) for s in seeds], axis=0)
+        yt = ygr(f"f{f}", tr) if a.grado_orc else None
+        oof[va] = np.mean([fit(a, L[tr], F, P, s, yt).predict(L.loc[va, F]) for s in seeds], axis=0)
         print(f"  fold {f} ({time.time() - t0:.0f}s)", flush=True)
     pred = None
     if a.test:
@@ -198,7 +209,8 @@ def run(a):
         if a.orc:
             L = pd.concat([lab, pd.DataFrame({c: X[f"{c}__full"].values[:len(lab)] for c in ocols})], axis=1)
             T = pd.concat([te, pd.DataFrame({c: X[f"{c}__full"].values[len(lab):] for c in ocols})], axis=1)
-        pred = np.mean([fit(a, L, F, P, s).predict(T[F]) for s in seeds], axis=0)
+        yf = ygr("full", np.ones(len(lab), bool)) if a.grado_orc else None
+        pred = np.mean([fit(a, L, F, P, s, yf).predict(T[F]) for s in seeds], axis=0)
     nm = f"f11_{a.name}_s{a.seeds}" + (f"o{a.seed0}" if a.seed0 else "")
     so, sp, w = feat_session.sesion(lab, oof, te if a.test else None, pred)
     guardar(nm, lab, oof, te if a.test else None, pred)

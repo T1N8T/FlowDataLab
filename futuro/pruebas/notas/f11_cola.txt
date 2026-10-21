@@ -15,3 +15,8 @@ orcBc | --orc --orc-var Bcoord --seeds 3 --threads 8 --ref f11_orc_s3 --tag "or�
 orcEc | --orc --orc-var Ecoord --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo variante E (B + tiempo relativo al avión) solo en coordinaciones"
 orcexit | --orc --orc-var exit --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo solo en exit_coordination (C pierde en entry_coordination)"
 orcc | --orc --seeds 10 --seed0 20 --test --threads 8 --ref f10_instr_l63_s10 --tag "N + oráculo de coord., semillas 20-29 + test (para 30 semillas)"
+refc | --seeds 10 --seed0 20 --test --threads 8 --ref f10_instr_l63_s10 --tag "N, semillas 20-29 + test (para N con 30 semillas)"
+gr03 | --grado-orc 0.3 --seeds 3 --threads 8 --tag "relevancia 1 a tareas que otros trabajan a ±60 s (>=30 % de las sesiones)"
+gr03orc | --grado-orc 0.3 --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "ídem + oráculo de coordinaciones"
+cfl | --add cfl --seeds 3 --threads 8 --tag "qué hace el siguiente cambio de nivel autorizado (¿al nivel de salida?)"
+cflorc | --add cfl --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "ídem + oráculo de coordinaciones"

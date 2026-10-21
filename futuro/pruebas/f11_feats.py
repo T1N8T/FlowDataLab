@@ -206,7 +206,44 @@ def causal(D):
     return o[[c for c in o.columns if c.startswith("cz_")]]
 
 
-BLOCKS = dict(link=link, pair=pair, nsi=nsi, io=io, causal=causal)
+def cfl(D):
+    """QUÉ hace el siguiente cambio de nivel autorizado (sx_cfl solo dice cuándo): si el nuevo nivel es el de salida
+    (resuelve exit_conditions), si acerca al nivel de salida, y el salto en FL. También el siguiente cambio de nivel de
+    salida (exit_FL) y si después coinciden. Sin etiquetas."""
+    a = D.drop_duplicates(["session", "cs", "t"])[["session", "cs", "t", "k_clearedFL", "exit_FL"]] \
+        .sort_values(["session", "cs", "t"]).reset_index(drop=True)
+    g = a.groupby(["session", "cs"], sort=False)
+    prev = g.k_clearedFL.shift()
+    ch = (a.k_clearedFL != prev) & prev.notna() & a.k_clearedFL.notna()
+    ev = a[ch].assign(new=a.k_clearedFL[ch], old=prev[ch], ex=a.exit_FL[ch])
+    out = {k: np.full(len(a), np.nan) for k in ("dt", "to_exit", "toward", "delta")}
+    for key, idx in a.groupby(["session", "cs"], sort=False).indices.items():
+        e = ev[(ev.session == key[0]) & (ev.cs == key[1])] if False else None
+    evg = {k: v for k, v in ev.groupby(["session", "cs"], sort=False)}
+    for key, idx in a.groupby(["session", "cs"], sort=False).indices.items():
+        e = evg.get(key)
+        if e is None:
+            continue
+        t = a.t.values[idx]
+        j = np.searchsorted(e.t.values, t + 0.5)
+        ok = j < len(e)
+        jj = j[ok]
+        ii = idx[ok]
+        out["dt"][ii] = e.t.values[jj] - t[ok]
+        nw, od, ex = e.new.values[jj], e.old.values[jj], e.ex.values[jj]
+        out["to_exit"][ii] = np.where(np.isnan(ex), np.nan, (np.abs(nw - ex) < 1).astype(float))
+        out["toward"][ii] = np.where(np.isnan(ex), np.nan, (np.abs(nw - ex) < np.abs(od - ex)).astype(float))
+        out["delta"][ii] = nw - od
+    A = a[["session", "cs", "t"]].assign(**{f"cf_{k}": v for k, v in out.items()})
+    o = D[["session", "cs", "t"]].merge(A, on=["session", "cs", "t"], how="left").drop(columns=["session", "cs", "t"])
+    o.index = D.index
+    ti = D.task_index.values
+    o["cf_exitcond_soon"] = np.where(ti == 10, (o.cf_to_exit == 1) & (o.cf_dt <= 60), np.nan).astype(float)
+    o["cf_dt_if_exit"] = np.where(o.cf_to_exit == 1, o.cf_dt, np.nan)
+    return o
+
+
+BLOCKS = dict(link=link, pair=pair, nsi=nsi, io=io, causal=causal, cfl=cfl)
 
 
 def block(name, D):
