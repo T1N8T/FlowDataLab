@@ -1,0 +1,11 @@
+{
+ "nombre": "adri_base",
+ "cfg": {
+  "feats": "base,logic,past,causal,geo",
+  "extra": [],
+  "drop": [],
+  "peso": null,
+  "params": {}
+ },
+ "cv": 0.6630740037950664
+}
