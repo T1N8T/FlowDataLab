@@ -38,6 +38,7 @@ def parse(argv=None):
     ap.add_argument("--name", default="lgb_future")
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--feats", default="base,logic,past,future", help="bloques de features separados por comas")
+    ap.add_argument("--drop", default="", help="columnas a quitar de los bloques, separadas por comas (ablación)")
     ap.add_argument("--n-estimators", type=int, default=400)
     ap.add_argument("--lr", type=float, default=0.05)
     ap.add_argument("--leaves", type=int, default=31)
@@ -145,7 +146,7 @@ def run(a, data):
     print(f"\n=== {a.name} {a.tag}  " + " ".join(f"{k}={v}" for k, v in vars(a).items() if k not in ("name", "tag")),
           flush=True)
     lab, te, fs = data["lab"], data["te"], data["fs"]
-    F = [c for b in a.feats.split(",") for c in fs[b]]
+    F = [c for b in a.feats.split(",") for c in fs[b] if c not in a.drop.split(",")]
     O = oracle_data(data, a.oraculo_var, a.oraculo_temp) if a.oraculo else None
     if a.oraculo:
         F = F + list(O["lab"].columns)
