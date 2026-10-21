@@ -1,0 +1,3 @@
+# tanda 3: oráculo con puerta por huella propia, y combinaciones según la tanda 2
+orcgate | --orc --orc-var gate --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo completo solo en filas sin huella propia"
+pairorc | --add pair --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "conflictos: segundo avión + oráculo de coordinaciones"

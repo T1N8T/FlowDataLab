@@ -1,0 +1,13 @@
+# cola dinámica del hilo f11 (f11_cola2.py). Ya lanzadas por la tanda 2: orc (10 semillas), softmax, io, ioorc.
+orcbase | --orc --orc-var base --seeds 3 --threads 8 --ref f11_orc_s3 --tag "N + oráculo completo (todas las tareas): con N no se había probado"
+orcgate | --orc --orc-var gate --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo completo solo en filas sin huella propia"
+mbin63  | --params '{"max_bin": 63}' --seeds 3 --threads 8 --tag "max_bin 63 (umbrales más gruesos con extra_trees; pista del Optuna de realista)"
+dart    | --params '{"boosting_type": "dart", "n_estimators": 400, "drop_rate": 0.1, "skip_drop": 0.5}' --seeds 3 --threads 8 --tag "DART con extra_trees"
+pairorc | --add pair --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "conflictos: segundo avión + oráculo de coordinaciones"
+orcb | --orc --seeds 10 --seed0 10 --test --threads 8 --ref f10_instr_l63_s10 --tag "N + oráculo de coord., semillas 10-19 + test (para 20 semillas)"
+refb | --seeds 10 --seed0 10 --test --threads 8 --ref f10_instr_l63_s10 --tag "N, semillas 10-19 + test (para N con 20 semillas)"
+causal | --add causal --seeds 3 --threads 8 --tag "cz_* de realista (desde el último cambio del estado de la tarea): no probado con futuro"
+causalorc | --add causal --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "cz_* + oráculo de coordinaciones"
+mono | --mono "si_match:-1,si_match_rk:-1" --seeds 3 --threads 8 --tag "monótona: antes la instrucción compatible -> más probable"
+n300 | --params '{"n_estimators": 300}' --seeds 3 --threads 8 --tag "menos árboles (800 restaba)"
+n250 | --params '{"n_estimators": 250}' --seeds 3 --threads 8 --tag "menos árboles (800 restaba)"

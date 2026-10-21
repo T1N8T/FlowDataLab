@@ -1,0 +1,12 @@
+# tanda 2 (3 semillas, frente a f11_ref_s3 o f11_orc_s3). Ideas no probadas en las secciones 0–22.
+orc | --orc --seeds 10 --test --threads 8 --ref f10_instr_l63_s10 --tag "N + oráculo de coordinaciones, 10 semillas + test (candidata a entrega)"
+softmax | --obj softmax --seeds 3 --threads 8 --tag "objetivo listwise softmax (entropía cruzada en el snapshot)"
+io | --add io --seeds 3 --threads 8 --tag "oráculo SIN etiquetas (qué hacen los demás con el avión en el mismo momento)"
+ioorc | --add io --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "oráculo sin etiquetas + oráculo de coordinaciones"
+orcbase | --orc --orc-var base --seeds 3 --threads 8 --ref f11_orc_s3 --tag "N + oráculo completo (todas las tareas): con N no se había probado"
+mbin63  | --params '{"max_bin": 63}' --seeds 3 --threads 8 --tag "max_bin 63 (umbrales más gruesos con extra_trees; pista del Optuna de realista)"
+dart    | --params '{"boosting_type": "dart", "n_estimators": 400, "drop_rate": 0.1, "skip_drop": 0.5}' --seeds 3 --threads 8 --tag "DART con extra_trees"
+softmax_lr10 | --obj softmax --params '{"learning_rate": 0.1}' --seeds 3 --threads 8 --tag "softmax con lr 0.1"
+ss05    | --params '{"subsample": 0.5}' --seeds 3 --threads 8 --tag "bagging más fuerte (subsample 0.5) con extra_trees"
+mbin511 | --params '{"max_bin": 511}' --seeds 3 --threads 8 --tag "max_bin 511"
+linear  | --params '{"linear_tree": true, "linear_lambda": 1.0}' --seeds 3 --threads 8 --tag "árboles lineales"
