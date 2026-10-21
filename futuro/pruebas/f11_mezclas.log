@@ -1,0 +1,33 @@
+N: CV 0.9242  CV023 0.9287  peor 0.7840  entry_coord top3 en 020 0.540
+  fuente N  : CV 0.9242  CV023 0.9287  peor 0.7840  ec020 0.540
+  fuente B  : CV 0.9244  CV023 0.9243  peor 0.7899  ec020 0.341
+  fuente SB : CV 0.9259  CV023 0.9254  peor 0.7959  ec020 0.336
+  fuente OR : CV 0.9233  CV023 0.9243  peor 0.7959  ec020 0.385
+  fuente SN : CV 0.9255  CV023 0.9302  peor 0.7840  ec020 0.525
+B   log   : anidada 0.9229 (-0.13)  CV023 0.9278  peor 0.7811  w_full 0.15  (CV 0.9259)  w_folds [0.35, 0.05, 0.15, 0.5, 0.5]  ec020 0.515
+B   rank  : anidada 0.9230 (-0.11)  CV023 0.9269  peor 0.7870  w_full 0.3  (CV 0.9258)  w_folds [0.3, 0.3, 0.95, 0.3, 0.6]  ec020 0.514
+B   coord : anidada 0.9249 (+0.07)  CV023 0.9287  peor 0.7840  w_full 0.8  (CV 0.9265)  w_folds [0.8, 0.85, 0.85, 0.5, 0.8]  ec020 0.422
+B   ecoord: anidada 0.9233 (-0.08)  CV023 0.9267  peor 0.7840  w_full 0.15  (CV 0.9252)  w_folds [0.15, 0.05, 0.15, 0.05, 0.8]  ec020 0.513
+B   xcoord: anidada 0.9243 (+0.02)  CV023 0.9311  peor 0.7751  w_full 0.95  (CV 0.9257)  w_folds [0.95, 0.95, 1.0, 0.75, 0.95]  ec020 0.551
+SB  log   : anidada 0.9230 (-0.12)  CV023 0.9236  peor 0.7959  w_full 0.4  (CV 0.9265)  w_folds [0.85, 1.0, 1.0, 0.45, 0.8]  ec020 0.452
+SB  rank  : anidada 0.9239 (-0.03)  CV023 0.9238  peor 0.7959  w_full 0.6  (CV 0.9267)  w_folds [0.65, 0.9, 0.9, 0.5, 0.65]  ec020 0.432
+SB  coord : anidada 0.9276 (+0.34)  CV023 0.9322  peor 0.7840  w_full 0.85  (CV 0.9279)  w_folds [0.85, 0.85, 0.85, 0.8, 0.8]  ec020 0.430
+SB  ecoord: anidada 0.9237 (-0.05)  CV023 0.9267  peor 0.7929  w_full 0.15  (CV 0.9252)  w_folds [0.15, 0.15, 0.15, 0.05, 0.8]  ec020 0.514
+SB  xcoord: anidada 0.9244 (+0.02)  CV023 0.9309  peor 0.7751  w_full 0.95  (CV 0.9261)  w_folds [0.85, 0.95, 0.95, 0.5, 0.95]  ec020 0.550
+OR  log   : anidada 0.9274 (+0.33)  CV023 0.9317  peor 0.7959  w_full 0.5  (CV 0.9281)  w_folds [0.5, 0.45, 0.55, 0.5, 0.55]  ec020 0.454
+OR  rank  : anidada 0.9256 (+0.14)  CV023 0.9324  peor 0.7840  w_full 0.3  (CV 0.9273)  w_folds [0.6, 0.3, 0.3, 0.3, 0.6]  ec020 0.508
+OR  coord : anidada 0.9255 (+0.14)  CV023 0.9289  peor 0.7870  w_full 0.65  (CV 0.9271)  w_folds [0.65, 0.65, 0.25, 0.65, 0.8]  ec020 0.457
+OR  ecoord: anidada 0.9236 (-0.06)  CV023 0.9276  peor 0.7870  w_full 0.25  (CV 0.9253)  w_folds [0.15, 0.1, 0.1, 0.25, 0.65]  ec020 0.498
+OR  xcoord: anidada 0.9251 (+0.09)  CV023 0.9320  peor 0.7781  w_full 0.6  (CV 0.9261)  w_folds [0.6, 1.0, 1.0, 0.6, 0.6]  ec020 0.555
+SN  log   : anidada 0.9251 (+0.09)  CV023 0.9298  peor 0.7840  w_full 1.0  (CV 0.9255)  w_folds [0.55, 1.0, 0.95, 1.0, 0.6]  ec020 0.525
+SN  rank  : anidada 0.9250 (+0.08)  CV023 0.9298  peor 0.7840  w_full 0.75  (CV 0.9255)  w_folds [0.5, 0.75, 0.5, 0.75, 0.75]  ec020 0.527
+SN  coord : anidada 0.9244 (+0.02)  CV023 0.9291  peor 0.7870  w_full 0.65  (CV 0.9246)  w_folds [0.65, 0.65, 0.55, 0.55, 0.65]  ec020 0.534
+SN  ecoord: anidada 0.9240 (-0.02)  CV023 0.9284  peor 0.7840  w_full 0.0  (CV 0.9242)  w_folds [0.0, 0.0, 0.25, 0.0, 0.2]  ec020 0.540
+SN  xcoord: anidada 0.9243 (+0.02)  CV023 0.9293  peor 0.7870  w_full 0.55  (CV 0.9245)  w_folds [0.55, 0.8, 0.55, 0.55, 0.55]  ec020 0.534
+[f11] f11_mezclas_SB_coord           CV top3 = 0.9279  min atco 0.784  std folds 0.020
+guardado f11_mezclas_SB_coord
+[f11] f11_mezclas_OR_log             CV top3 = 0.9281  min atco 0.793  std folds 0.017
+guardado f11_mezclas_OR_log
+[f11] f11_mezclas_OR_rank            CV top3 = 0.9273  min atco 0.784  std folds 0.019
+guardado f11_mezclas_OR_rank
+total 43s
