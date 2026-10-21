@@ -1,0 +1,96 @@
+474688 filas etiquetadas, 66409 de test; bloques: base=88, logic=14, future=12, past=11, coord=12, clear=10, block=17  (9s)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+oráculo coord calculado (8s)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+  F["or_dt"][idx] = np.nanmedian(np.where(ok, m["dt"], np.nan), axis=1)
+oráculo base calculado (6s)
+M0: 125 features, CV 1.er pase (1 semilla) 0.8996  (160s)
+A: 135 features, CV 1.er pase (1 semilla) 0.9057  (307s)
+O: 145 features, CV 1.er pase (1 semilla) 0.9070  (453s)
+B: 145 features, CV 1.er pase (1 semilla) 0.9109  (596s)
+
+1 · % de la influencia (|SHAP|, 5 primeros candidatos) por origen de la información
+                 futuro  pasado  snapshot  futuro clear  otras sesiones
+modelo zona                                                            
+M0     CV          33.4     5.8      60.8           0.0             0.0
+       test 020    34.1     5.0      61.0           0.0             0.0
+       test 023    34.2     4.5      61.4           0.0             0.0
+A      CV          29.6     5.3      55.6           9.5             0.0
+       test 020    30.1     5.2      54.7          10.0             0.0
+       test 023    30.5     4.8      55.9           8.8             0.0
+O      CV          26.8     4.1      44.2           8.7            16.2
+       test 020    27.9     4.0      43.7           9.3            15.2
+       test 023    28.5     3.6      44.6           7.7            15.7
+B      CV          27.5     4.6      50.2           8.6             9.1
+       test 020    28.0     4.3      48.4           9.5             9.8
+       test 023    28.2     4.0      50.2           8.7             8.9
+
+A · 10 variables más influyentes (|SHAP| medio en los 5 primeros):
+                        CV    020    023
+task_index           0.617  0.620  0.653
+f_next_input         0.517  0.552  0.476
+f_end_in_block       0.409  0.409  0.426
+f_task_end           0.399  0.355  0.410
+logic_window_dist    0.307  0.313  0.291
+logic_edf_rank_type  0.262  0.285  0.301
+sx_heading           0.253  0.242  0.192
+k_timeToExitPoint    0.187  0.252  0.254
+logic_feasible       0.185  0.186  0.183
+f_next_input_rk      0.185  0.228  0.201
+
+B · 10 variables más influyentes (|SHAP| medio en los 5 primeros):
+                        CV    020    023
+task_index           0.580  0.524  0.574
+f_next_input         0.468  0.533  0.470
+f_end_in_block       0.368  0.382  0.395
+f_task_end           0.367  0.362  0.411
+logic_window_dist    0.295  0.339  0.324
+logic_edf_rank_type  0.214  0.220  0.230
+sx_heading           0.212  0.260  0.208
+f_next_input_rk      0.194  0.223  0.191
+logic_feasible       0.192  0.159  0.160
+or_ever              0.185  0.191  0.188
+
+2 · adversaria test 020 frente a etiquetados: AUC 0.999; variables que más lo delatan: {'seq_len': 0.25, 'a_n300': 0.25, 'k_outCoordRevision': 0.16, 'blk_len': 0.14, 'logic_n_window': 0.12, 'a_n60': 0.08}
+
+2 · adversaria test 023 frente a etiquetados: AUC 0.999; variables que más lo delatan: {'logic_n_window': 0.31, 'a_n300': 0.2, 'seq_len': 0.18, 'blk_len': 0.17, 'x_state_age': 0.07, 'k_outCoordRevision': 0.07}
+
+3 · SHAP medio de f_next_input por tramos (vacío: CV 30%, 020 29%, 023 38%)
+       (-1.0, 3.0]  (3.0, 10.0]  (10.0, 30.0]  (30.0, 60.0]  (60.0, 180.0]  (180.0, 1000000000.0]
+A CV         1.993        1.890         0.891        -0.048         -0.124                 -0.101
+A 020        1.897        1.819         0.800        -0.070         -0.123                 -0.107
+A 023        1.882        1.868         0.889        -0.064         -0.124                 -0.112
+B CV         1.782        1.721         0.866        -0.041         -0.113                 -0.112
+B 020        1.752        1.717         0.872        -0.028         -0.122                 -0.113
+B 023        1.764        1.795         0.965        -0.032         -0.127                 -0.115
+
+3 · SHAP medio de p_task_start por tramos (vacío: CV 0%, 020 0%, 023 0%)
+       (-1.0, 30.0]  (30.0, 120.0]  (120.0, 300.0]  (300.0, 600.0]  (600.0, 1000000000.0]
+A CV          0.005          0.022           0.071           0.063                 -0.144
+A 020         0.010          0.032           0.082           0.068                 -0.156
+A 023         0.019          0.034           0.087           0.072                 -0.093
+B CV         -0.049         -0.008           0.042           0.053                 -0.065
+B 020        -0.053          0.024           0.063           0.048                 -0.107
+B 023        -0.045          0.027           0.063           0.045                 -0.082
+
+4 · test 020: en 53% de los snapshots el top-3 del 1.er pase cambia de A a B
+   tipos que entran al top-3 con B: {'exit_coord': 127, 'zone': 73, 'return_route': 70, 'conflict': 51, 'exit_cond': 49}
+   tipos que salen del top-3 con B: {'entry_coord': 268, 'exit_coord': 108, 'zone': 45, 'return_route': 29, 'conflict': 22}
+   SHAP medio por origen en B (filas que entran / salen / resto):
+                entran  salen  resto
+futuro           0.590  0.932 -0.054
+futuro clear     0.251  0.329 -0.031
+otras sesiones   0.498 -0.315 -0.072
+pasado           0.076 -0.046  0.005
+snapshot         1.900  1.647 -0.082
+
+(619s)

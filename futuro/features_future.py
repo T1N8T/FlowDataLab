@@ -14,6 +14,8 @@ from pathlib import Path
 from feat_coord import add_coord      # sc_*: cambios futuros de coordinación / assume (Pablo)
 from feat_clear import add_clear      # sx_*: cambios futuros de instrucciones (Adri)
 from feat_block import add_block      # bk_*: futuro medido por racha (Pablo)
+from feat_rel import add_rel          # rl_*: relativas entre candidatos del snapshot (Pablo)
+from feat_geo import add_geo          # gxa_/gxb_/gxc_*: geometría del tráfico (Pablo)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA, MODELS = ROOT / "Data", ROOT / "models"
@@ -161,11 +163,13 @@ def build():
     d = add_coord(d)
     d = add_clear(d)
     d = add_block(d)
+    d = add_rel(d)
+    d = add_geo(d)
     return d
 
 
 def feature_sets(d):
-    base = [c for c in d.columns if c not in META and not c.startswith(("logic_", "f_", "p_", "sc_", "sx_", "bk_"))
+    base = [c for c in d.columns if c not in META and not c.startswith(("logic_", "f_", "p_", "sc_", "sx_", "bk_", "rl_", "gx"))
             and c not in ("blk_pos", "blk_len", "gap_prev", "gap_next")]
     logic = [c for c in d.columns if c.startswith("logic_")]
     fut = [c for c in d.columns if c.startswith("f_")]
@@ -173,7 +177,9 @@ def feature_sets(d):
     coord = [c for c in d.columns if c.startswith("sc_")]
     clear = [c for c in d.columns if c.startswith("sx_")]
     block = [c for c in d.columns if c.startswith("bk_")]
-    return dict(base=base, logic=logic, future=fut, past=past, coord=coord, clear=clear, block=block)
+    rel = [c for c in d.columns if c.startswith("rl_")]
+    geo = {f"geo{k}": [c for c in d.columns if c.startswith(f"gx{k.lower()}_")] for k in "ABC"}
+    return dict(base=base, logic=logic, future=fut, past=past, coord=coord, clear=clear, block=block, rel=rel, **geo)
 
 
 if __name__ == "__main__":
