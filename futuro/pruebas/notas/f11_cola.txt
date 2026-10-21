@@ -31,3 +31,8 @@ t3n10 | --params '{"lambdarank_truncation_level": 3}' --seeds 10 --test --thread
 sig05orc | --params '{"sigmoid": 0.5}' --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "lambdarank sigmoid 0.5 + oráculo"
 sig2orc | --params '{"sigmoid": 2.0}' --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "lambdarank sigmoid 2 + oráculo"
 watcoorc | --weight atco:0.5 --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "peso por controlador 1/sqrt(n) + oráculo"
+causalorc10 | --add causal --orc --seeds 10 --test --threads 8 --ref f11_orc_s10 --tag "cz_* + oráculo, 10 semillas (confirmación)"
+watcoorc10 | --weight atco:0.5 --orc --seeds 10 --test --threads 8 --ref f11_orc_s10 --tag "peso por controlador + oráculo, 10 semillas (confirmación)"
+mbin63orc10 | --params '{"max_bin": 63}' --orc --seeds 10 --test --threads 8 --ref f11_orc_s10 --tag "max_bin 63 + oráculo, 10 semillas (confirmación)"
+coordorc | --feats base,logic,past,future,clear,instr,coord --orc --seeds 3 --threads 8 --ref f11_orc_s3 --tag "bloque coord (sc_*) sobre N + oráculo: en el modelo antiguo no aportaba; con extra_trees no se había medido"
+coordN | --feats base,logic,past,future,clear,instr,coord --seeds 3 --threads 8 --tag "bloque coord (sc_*) sobre N"
