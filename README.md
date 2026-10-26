@@ -61,7 +61,6 @@ futuro/               diario completo de la línea con futuro (LGB_futuro.ipynb)
 realista/             diario de la línea sin futuro (LGB_realista.ipynb)
 src/, cv/, linear/, hierarchical/, stacking/, pruebas/   código de la línea limpia, métricas y modelos descartados
 experiments/          registros de ejecuciones
-EQUIPO.md             estado del proyecto y normas de trabajo durante el hackathon
 ```
 
 ## Puesta en marcha

@@ -1,2 +1,0 @@
-[f5_clear_et] f5_clear_l63                   CV top3 = 0.9106  min atco 0.778  std folds 0.018
-f5_clear_l63: CV 0.9106 (927s) base+logic+past+future+clear {'num_leaves': 63, 'min_child_samples': 100, 'extra_trees': True}

@@ -1,7 +1,0 @@
-filas instr 50.9%; snapshots con respuesta instr 11017/13175; 252 features
-  fold 0 (82s)
-  fold 1 (180s)
-  fold 2 (268s)
-  fold 3 (356s)
-  fold 4 (444s)
-especialista: top-3 en snapshots con respuesta instr 0.9666 (N: 0.9513) (517s)

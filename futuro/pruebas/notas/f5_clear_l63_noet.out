@@ -1,4 +1,0 @@
-[f5_clear_et] f5_clear_l63_noet              CV top3 = 0.9077  min atco 0.760  std folds 0.021
-f5_clear_l63_noet: CV 0.9077 (272s) base+logic+past+future+clear {'num_leaves': 63, 'min_child_samples': 100}
-[f5_stack] f5_clear_l63_noet_ses          CV top3 = 0.9159  min atco 0.766  std folds 0.023
-FIN

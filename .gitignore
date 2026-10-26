@@ -70,3 +70,10 @@ realista/claude/oof/
 realista/claude/pred/
 realista/claude/*.log
 realista/claude/log.txt
+
+# logs de ejecución (no se versionan; realista/tune/*.log es el estudio de Optuna y sí se guarda)
+*.log
+*.out
+*_log.txt
+log.txt
+!realista/tune/*.log

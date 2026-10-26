@@ -1,4 +1,0 @@
-[f1_lgb] f1_best_extratrees             CV top3 = 0.9035  min atco 0.769  std folds 0.013
-f1_best_extratrees: CV 0.9035 (473s) {'extra_trees': True} seeds=[0, 1, 2]
-[f1_lgb] f1_best_l63_mc100              CV top3 = 0.9013  min atco 0.749  std folds 0.018
-f1_best_l63_mc100: CV 0.9013 (408s) {'num_leaves': 63, 'min_child_samples': 100} seeds=[0, 1, 2]
