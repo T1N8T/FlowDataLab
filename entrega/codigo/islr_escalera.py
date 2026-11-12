@@ -28,8 +28,10 @@ Uso:
   python entrega/codigo/islr_escalera.py --rapido                     # comprobación: fold 0, 20 % del train, no guarda
   python entrega/codigo/islr_escalera.py --info snapshot              # escalera completa (guarda cada OOF al acabar)
   python entrega/codigo/islr_escalera.py --info futuro --modelos ridge_cond boosting
+  python entrega/codigo/islr_escalera.py --info futuro --test          # + reentrena con todo y escribe el envío de cada uno
   --forzar recalcula los OOF que ya existan (por defecto se reutilizan: si se corta, al relanzar continúa).
-Salidas: salidas/oof/escalera_<info>_<modelo>.csv y salidas/notas/islr_escalera_<info>.csv (resumen + pruebas por pares).
+Salidas: salidas/oof/escalera_<info>_<modelo>.csv, con --test salidas/preds/ y salidas/submissions/sub_escalera_<info>_<modelo>.csv,
+y salidas/notas/islr_escalera_<info>.csv (resumen, pruebas por pares y la elección "solo con el libro": regla de 1 SE).
 """
 import argparse, time, warnings
 import numpy as np, pandas as pd
@@ -43,24 +45,27 @@ META = {'sample_id', 'target_index', 'session', 'atco', 'scenario', 'timestamp',
         'split', 'fold', 'block'}
 PELDANOS = ["prior_tipo", "naive_bayes", "lda", "logit_fila", "logit_cond", "ridge_cond", "lasso_cond", "gam_cond",
             "arbol", "bagging", "random_forest", "boosting", "boosting_rank", "red"]
+FUERA_ISLR = ["boosting_rank"]          # se calcula como referencia, pero la elección "solo con el libro" no lo considera
 REJILLA = {"ridge_cond": [1e-4, 1e-3, 1e-2, 1e-1], "lasso_cond": [1e-4, 3e-4, 1e-3, 3e-3],
            "gam_cond": [1e-4, 1e-3, 1e-2, 1e-1], "arbol": [16, 64, 256, 1024]}
 
 
 # ------------------------------------------------------------------------------------------------------------------ datos
 def cargar(info):
-    """DataFrame de train+validation ordenado por sample_id, row_index, con fold y target_index, y la lista de features."""
+    """(D, te, cols): train+validation y test ordenados por sample_id, row_index (D con fold y target_index) y features."""
     if info == "snapshot":
         d = pd.concat([pd.read_csv(DATOS / f"{f}.csv") for f in ("train", "validation")], ignore_index=True)
         folds = pd.read_csv(DATOS / "folds.csv")
         d["fold"] = d.atco.map(dict(zip(folds.atco, folds.fold)))
+        te = pd.read_csv(DATOS / "test.csv").assign(fold=-1)
         cols = [c for c in d.columns if c not in META and pd.api.types.is_numeric_dtype(d[c])]
     else:
         mod = __import__("features_realista" if info == "realista" else "features_futuro")
-        d, _, fs = mod.construir()
+        d, te, fs = mod.construir()
         cols = [c for c in sum(fs.values(), []) if c not in META]
     d = d.sort_values(["sample_id", "row_index"]).reset_index(drop=True)
-    return d, list(dict.fromkeys(cols))
+    te = te.sort_values(["sample_id", "row_index"]).reset_index(drop=True)
+    return d, te, list(dict.fromkeys(cols))
 
 
 class Prep:
@@ -232,6 +237,16 @@ def oof_modelo(nombre, D, cols, folds):
     return pd.concat(partes, ignore_index=True)
 
 
+def test_modelo(nombre, D, te, cols):
+    """Como en los labs de ISLR (§6.5.2, p. 278): el hiperparámetro se elige por CV con los 5 folds y el modelo final se
+    reentrena con TODO train+validation antes de predecir el test."""
+    t0 = time.time()
+    par = elegir_par(nombre, D, cols)
+    s = ajustar_predecir(nombre, D, te, cols, par)
+    print(f"   test: {te.sample_id.nunique()} snapshots ({time.time() - t0:.0f}s)", flush=True)
+    return pd.DataFrame({"sample_id": te.sample_id.values, "row_index": te.row_index.values, "score": s})
+
+
 # ---------------------------------------------------------------------------------------------------------------- main
 def resumen(info, nombres):
     lab = labels()
@@ -240,8 +255,8 @@ def resumen(info, nombres):
     Pa = H.groupby(atco).mean()
     filas = []
     for i, n in enumerate(nombres):
-        r = dict(modelo=n, cv=H[n].mean(), media_atco=Pa[n].mean(), peor_atco=Pa[n].min(),
-                 cv_023=H[n][atco.isin(CV023)].mean())
+        r = dict(modelo=n, cv=H[n].mean(), media_atco=Pa[n].mean(), se_atco=Pa[n].std(ddof=1) / np.sqrt(len(Pa)),
+                 peor_atco=Pa[n].min(), cv_023=H[n][atco.isin(CV023)].mean())
         if i:
             a = nombres[i - 1]; d = (Pa[n] - Pa[a]).values; ic = boot_ic(d)
             r.update(vs_anterior=a, dif=d.mean(), ic95_inf=ic[0], ic95_sup=ic[1], suben=int((d > 0).sum()),
@@ -251,9 +266,20 @@ def resumen(info, nombres):
     R["p_perm_holm"] = np.nan
     m = R.p_perm.notna()
     R.loc[m, "p_perm_holm"] = holm(R.loc[m, "p_perm"])
+    # Elección "solo con el libro": regla de un error estándar (ISLR §6.1.3, p. 237) sobre la media por controlador (el
+    # privado es un controlador). Entre los peldaños de ISLR (fuera boosting_rank), el más simple —el primero de la
+    # escalera— cuya media esté a menos de 1 SE de la mejor.
+    isl = R[~R.modelo.isin(FUERA_ISLR)]
+    mejor = isl.loc[isl.media_atco.idxmax()]
+    elegido = isl[isl.media_atco >= mejor.media_atco - mejor.se_atco].iloc[0]
+    R["mejor_cv"] = R.modelo == mejor.modelo
+    R["elegido_1se"] = R.modelo == elegido.modelo
     R.to_csv(SALIDAS / "notas" / f"islr_escalera_{info}.csv", index=False)
     pd.set_option("display.width", 240, "display.max_columns", 40)
     print(R.round(4).to_string(index=False))
+    print(f"\nmejor CV (peldaños de ISLR): {mejor.modelo} {mejor.media_atco:.4f} ± {mejor.se_atco:.4f} (SE) · "
+          f"regla de 1 SE ⇒ {elegido.modelo} {elegido.media_atco:.4f} · envío: "
+          f"salidas/submissions/sub_escalera_{info}_{elegido.modelo}.csv")
 
 
 def main():
@@ -262,10 +288,11 @@ def main():
     ap.add_argument("--modelos", nargs="*", default=PELDANOS)
     ap.add_argument("--rapido", action="store_true", help="fold 0, 20 %% de los snapshots de train, no guarda")
     ap.add_argument("--forzar", action="store_true")
+    ap.add_argument("--test", action="store_true", help="además, reentrena con todo y escribe preds/ y submissions/")
     a = ap.parse_args()
 
     t0 = time.time()
-    D, cols = cargar(a.info)
+    D, te, cols = cargar(a.info)
     print(f"info={a.info}: {D.sample_id.nunique()} snapshots, {len(D)} filas, {len(cols)} variables "
           f"({time.time() - t0:.0f}s)", flush=True)
     folds = sorted(D.fold.unique())
@@ -279,13 +306,18 @@ def main():
     hechos = []
     for n in a.modelos:
         nombre_oof = f"escalera_{a.info}_{n}"
-        if not a.rapido and not a.forzar and leer(nombre_oof) is not None:
-            print(f"== {n}: ya existe {nombre_oof}, se reutiliza", flush=True); hechos.append(n); continue
-        print(f"== {n}", flush=True)
         t1 = time.time()
-        oof = oof_modelo(n, D, cols, folds)
+        if not a.rapido and not a.forzar and leer(nombre_oof) is not None:
+            print(f"== {n}: ya existe {nombre_oof}, se reutiliza", flush=True)
+        else:
+            print(f"== {n}", flush=True)
+            oof = oof_modelo(n, D, cols, folds)
+            if not a.rapido:
+                guardar(nombre_oof, oof=oof)
         if not a.rapido:
-            guardar(nombre_oof, oof=oof); hechos.append(n)
+            hechos.append(n)
+            if a.test and (a.forzar or leer(nombre_oof, "preds") is None):
+                guardar(nombre_oof, preds=test_modelo(n, D, te, cols))
         print(f"   {n}: {time.time() - t1:.0f}s", flush=True)
     if not a.rapido and hechos:
         print(f"\n== resumen ({a.info})"); resumen(a.info, hechos)
