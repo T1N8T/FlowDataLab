@@ -46,8 +46,8 @@ META = {'sample_id', 'target_index', 'session', 'atco', 'scenario', 'timestamp',
 PELDANOS = ["prior_tipo", "naive_bayes", "lda", "logit_fila", "logit_cond", "ridge_cond", "lasso_cond", "gam_cond",
             "arbol", "bagging", "random_forest", "boosting", "boosting_rank", "red"]
 FUERA_ISLR = ["boosting_rank"]          # se calcula como referencia, pero la elección "solo con el libro" no lo considera
-REJILLA = {"ridge_cond": [1e-4, 1e-3, 1e-2, 1e-1], "lasso_cond": [1e-4, 3e-4, 1e-3, 3e-3],
-           "gam_cond": [1e-4, 1e-3, 1e-2, 1e-1], "arbol": [16, 64, 256, 1024]}
+REJILLA = {"ridge_cond": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0], "lasso_cond": [1e-5, 1e-4, 1e-3, 3e-3, 1e-2],
+           "gam_cond": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2], "arbol": [16, 64, 256, 1024]}
 
 
 # ------------------------------------------------------------------------------------------------------------------ datos
@@ -247,6 +247,40 @@ def test_modelo(nombre, D, te, cols):
     return pd.DataFrame({"sample_id": te.sample_id.values, "row_index": te.row_index.values, "score": s})
 
 
+def tabla_stack(info, nombres, base, carpeta):
+    """Una columna por peldaño: su score estandarizado dentro de cada snapshot (z), sobre las filas de `base`."""
+    O = base[["sample_id", "row_index"] + [c for c in ("target_index", "fold") if c in base]].copy()
+    cols = []
+    for n in nombres:
+        s = leer(f"escalera_{info}_{n}", carpeta)
+        if s is None:
+            continue
+        O = O.merge(s.rename(columns={"score": f"z_{n}"}), on=["sample_id", "row_index"], how="left")
+        g = O.groupby("sample_id")[f"z_{n}"]
+        O[f"z_{n}"] = ((O[f"z_{n}"] - g.transform("mean")) / g.transform("std").replace(0, 1)).fillna(0)
+        cols.append(f"z_{n}")
+    return O, cols
+
+
+def stack(info, nombres, D, te, folds, test):
+    """Stacking: logística condicional ridge (λ por CV anidada) sobre los scores OOF de los peldaños. Se evalúa con la
+    misma CV por controlador (pesos ajustados en 4 folds de OOF, medidos en el 5.º) y, para test, se ajusta con todo el
+    OOF y se aplica a las predicciones de test de cada peldaño (reentrenados con todo)."""
+    nombres = [n for n in nombres if leer(f"escalera_{info}_{n}") is not None
+               and (not test or leer(f"escalera_{info}_{n}", "preds") is not None)]
+    print(f"== stack sobre {len(nombres)} peldaños: {', '.join(nombres)}", flush=True)
+    O, cols = tabla_stack(info, nombres, D, "oof")
+    guardar(f"escalera_{info}_stack", oof=oof_modelo("ridge_cond", O, cols, folds))
+    if test:
+        Ote, _ = tabla_stack(info, nombres, te, "preds")
+        guardar(f"escalera_{info}_stack", preds=test_modelo("ridge_cond", O, Ote, cols))
+        pp = Prep().fit(O, cols)
+        w = logit_cond_fit(pp.transform(O), O.target_index.values.astype("float64"), O.sample_id.values,
+                           lam=elegir_par("ridge_cond", O, cols))
+        print("   pesos del stack (variables estandarizadas): " +
+              ", ".join(f"{c[2:]} {v:+.2f}" for c, v in sorted(zip(cols, w), key=lambda x: -abs(x[1]))), flush=True)
+
+
 # ---------------------------------------------------------------------------------------------------------------- main
 def resumen(info, nombres):
     lab = labels()
@@ -289,6 +323,7 @@ def main():
     ap.add_argument("--rapido", action="store_true", help="fold 0, 20 %% de los snapshots de train, no guarda")
     ap.add_argument("--forzar", action="store_true")
     ap.add_argument("--test", action="store_true", help="además, reentrena con todo y escribe preds/ y submissions/")
+    ap.add_argument("--stack", action="store_true", help="al final, stacking de los peldaños (ver stack())")
     a = ap.parse_args()
 
     t0 = time.time()
@@ -319,6 +354,11 @@ def main():
             if a.test and (a.forzar or leer(nombre_oof, "preds") is None):
                 guardar(nombre_oof, preds=test_modelo(n, D, te, cols))
         print(f"   {n}: {time.time() - t1:.0f}s", flush=True)
+    if a.stack and not a.rapido and len(hechos) > 1:
+        t1 = time.time()
+        stack(a.info, hechos, D, te, folds, a.test)
+        hechos.append("stack")
+        print(f"   stack: {time.time() - t1:.0f}s", flush=True)
     if not a.rapido and hechos:
         print(f"\n== resumen ({a.info})"); resumen(a.info, hechos)
 
