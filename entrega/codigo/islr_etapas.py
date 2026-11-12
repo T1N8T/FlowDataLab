@@ -178,7 +178,9 @@ def cv_logit(ctx, bloques, lam=1e-3):
 
 
 def H(ctx, oof):
-    return hits(ctx.lab[K].assign(score=oof))
+    """Acierto por snapshot, solo en los folds evaluados (en --rapido, el fold 0)."""
+    m = ctx.lab.fold.isin(ctx.folds).values
+    return hits(ctx.lab.loc[m, K].assign(score=oof[m]))
 
 
 def con_sesion(ctx, oof):
